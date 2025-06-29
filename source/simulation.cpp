@@ -1,4 +1,4 @@
-#include "snaze.hpp"
+#include "simulation.h"
 #include <stdexcept>
 #include <iostream>
 
@@ -132,7 +132,7 @@ void SnazeSimulation::initialize(int argc, char *argv[])
 
     if (argc == 1)
     {
-        std::cerr << "you need to provide at least one file or directory\n";
+        usage();
         std::exit(1);
     }
 
