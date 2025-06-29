@@ -9,11 +9,11 @@ void SnazeSimulation::usage()
 
     std::cout << "Usage: snaze [<options>] <input_level_file>\n"
               << "Game simulation options:\n"
-              << "--help Print this help text.\n"
-              << "--fps <num> Number of frames (board) presented per second.\n"
-              << "--lives <num> Number of lives the snake shall have. Default = 5."
-              << "--food <num> Number of food pellets for the entire simulation. Default = 10.\n"
-              << "--playertype <type> Type of snake intelligence: random, backtracking. Default = backtracking\n";
+              << "--help/-h Print this help text.\n"
+              << "--fps/-f <num> Number of frames (board) presented per second.\n"
+              << "--lives/-l <num> Number of lives the snake shall have. Default = 5.\n"
+              << "--food/-d <num> Number of food pellets for the entire simulation. Default = 10.\n"
+              << "--playertype/-p <type> Type of snake intelligence: random, backtracking. Default = backtracking\n";
 }
 
 bool has_next_argument(int i, int argc)
@@ -49,6 +49,9 @@ void assign_if_valid_number(const std::string &str_value, RunningOpt &run_option
                 break;
             }
         }
+        else{
+           std::cout << "Warning: please choose a number bigger than 0\n"; 
+        }
     }
     catch (const std::exception &e)
     {
@@ -58,7 +61,6 @@ void assign_if_valid_number(const std::string &str_value, RunningOpt &run_option
 
 void SnazeSimulation::validate_arguments(int argc,  char *argv[], RunningOpt &run_options)
 {
-    std::vector<std::string> valid_options{"--help", "--fps", "--lives", "--food", "--playertype"};
     bool skip_next{false};
 
     for (int i{1}; i < argc; ++i)
@@ -71,31 +73,31 @@ void SnazeSimulation::validate_arguments(int argc,  char *argv[], RunningOpt &ru
 
         std::string current_arg{argv[i]};
 
-        if (current_arg == valid_options[0])
+        if (current_arg == "--help" || current_arg == "-h")
         {
             usage();
             exit(0);
         }
 
-        else if (current_arg == valid_options[1] && has_next_argument(i, argc))
+        else if ((current_arg == "--fps" || current_arg == "-f") && has_next_argument(i, argc))
         {
             assign_if_valid_number(argv[i + 1], run_options, 0);
             skip_next = true;
         }
 
-        else if (current_arg == valid_options[2] && has_next_argument(i, argc))
+        else if ((current_arg == "--lives" || current_arg == "-l") && has_next_argument(i, argc))
         {
             assign_if_valid_number(argv[i + 1], run_options, 1);
             skip_next = true;
         }
 
-        else if (current_arg == valid_options[3] && has_next_argument(i, argc))
+        else if ((current_arg == "--food" || current_arg == "-d") && has_next_argument(i, argc))
         {
             assign_if_valid_number(argv[i + 1], run_options, 2);
             skip_next = true;
         }
 
-        else if (current_arg == valid_options[4] && has_next_argument(i, argc))
+        else if ((current_arg == "--playertype" || current_arg == "-p") && has_next_argument(i, argc))
         {
             std::string next_arg{argv[i + 1]};
             if (next_arg == "random")
@@ -114,7 +116,13 @@ void SnazeSimulation::validate_arguments(int argc,  char *argv[], RunningOpt &ru
         }
         else
         {
-            // validação dos arquivos
+            if(current_arg.substr(0, 2) == "--" || current_arg[0] == '-'){
+                std::cout << "Warning: invalid option\n";
+            }
+            else {
+
+                // validação dos arquivos
+            }
         }
     }
 }
