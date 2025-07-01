@@ -6,11 +6,19 @@
 #include <cstdint>
 #include "snake.hpp"
 
+enum game_state_e : std::uint8_t {
+  START = 0,
+  RUN,
+  CRASH,
+  LEVEL_UP,
+  GAME_OVER
+};
 
 enum player_type_e : std::uint8_t
 {
   RANDOM = 0,
-  BACKTRACKING
+  BACKTRACKING,
+  HUMAN
 };
 
 struct RunningOpt
