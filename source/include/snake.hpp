@@ -1,13 +1,11 @@
 #ifndef SNAKE_HPP
 #define SNAKE_HPP
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
-
-struct MoveDir
-{
+struct MoveDir {
   short dx;
   short dy;
   void turn_left();
@@ -15,20 +13,18 @@ struct MoveDir
 };
 
 // location inside a board
-struct TilePos
-{
+struct TilePos {
   size_t row;
   size_t col;
 };
 
-class Snake
-{
+class Snake {
 private:
   std::vector<TilePos> body;
- // SnakeLevel running_level
+  // SnakeLevel running_level
   MoveDir actual_direction;
 
-  public:
+public:
   unsigned short int lives;
   void step_foward();
   void step_backward();
