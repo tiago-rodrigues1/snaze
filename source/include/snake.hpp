@@ -5,17 +5,13 @@
 #include <cstdint>
 #include <vector>
 
+#include "common.hpp"
+
 struct MoveDir {
   short dx;
   short dy;
   void turn_left();
   void turn_right();
-};
-
-// location inside a board
-struct TilePos {
-  size_t row;
-  size_t col;
 };
 
 class Snake {

@@ -19,7 +19,9 @@ set( APP_NAME "snaze" )
 add_executable( ${APP_NAME}
   source/snake.cpp
   source/simulation.cpp
-  source/main.cpp
+  source/test.cpp
+  source/level.cpp
+  source/utils.cpp
 )
 target_include_directories( ${APP_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lib )
 target_compile_features( ${APP_NAME}  PUBLIC cxx_std_17 )
