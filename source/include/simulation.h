@@ -5,10 +5,10 @@
 #include <string>
 #include <vector>
 #include "snake.hpp"
+#include "player.hpp"
 
 enum game_state_e : std::uint8_t { START = 0, RUN, CRASH, LEVEL_UP, GAME_OVER };
 
-enum player_type_e : std::uint8_t { RANDOM = 0, BACKTRACKING, HUMAN };
 
 struct RunningOpt {
   std::vector<std::string> input_list;
