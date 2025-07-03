@@ -71,7 +71,7 @@ bool Level::is_free(const TilePos& loc) const { return get_content_at(loc) == ' 
 
 bool Level::is_wall(const TilePos& loc) const { return get_content_at(loc) == '#'; }
 
-bool Level::is_food(const TilePos& loc) const { return get_content_at(loc) == '🍎'; }
+bool Level::is_food(const TilePos& loc) const { return get_content_at(loc) == '*'; }
 
 TilePos Level::get_snake_spawn_loc() const { return snake_spawn; };
 
@@ -103,7 +103,7 @@ void Level::set_content_at(const TilePos& loc, tile_type_e type){
     board[loc.row][loc.col] = '#';
     break;
   case tile_type_e::FOOD:
-    board[loc.row][loc.col] = '🍎';
+    board[loc.row][loc.col] = '*';
     break;
   default:
     break;

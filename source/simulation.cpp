@@ -3,6 +3,9 @@
 #include <stdexcept>
 
 RunningOpt SnazeSimulation::run_options;
+Snake* SnazeSimulation::snake = nullptr;
+RandomSPlayer* SnazeSimulation::player = nullptr;
+Level* SnazeSimulation::running_level = nullptr;
 
 void SnazeSimulation::usage() {
 
@@ -112,4 +115,29 @@ void SnazeSimulation::initialize(int argc, char* argv[]) {
   }
 
   validate_arguments(argc, argv, run_options);
+}
+
+bool test_dir(MoveDir current, MoveDir next, int dir = 0) {
+  if (dir == 1) {
+    current.turn_right();
+  } else if (dir == 2) {
+    current.turn_left();
+  }
+  return (current.dx == next.dx && current.dy == next.dy);
+}
+
+void SnazeSimulation::move_snake() {
+  auto board = running_level->get_board();
+  MoveDir next_move = player->next_move(board);
+  MoveDir current_dir = snake->actual_direction;
+
+  if (test_dir(current_dir, next_move)) {
+    snake->step_foward();
+  } else if (test_dir(current_dir, next_move, 1)){
+    snake->actual_direction.turn_right();
+    snake->step_foward();
+  } else if(test_dir(current_dir, next_move, 2)){
+    snake->actual_direction.turn_left();
+    snake->step_foward();
+  }
 }
