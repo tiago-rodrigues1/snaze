@@ -20,16 +20,18 @@ struct RunningOpt {
 
 class SnazeSimulation {
 private:
-  static RunningOpt run_options;
-  static Snake* snake;
-  static RandomSPlayer* player;
-  static Level* running_level;
+static RunningOpt run_options;
+static Snake* snake;
+static RandomSPlayer* player;
+static Level* running_level;
+static game_state_e game_state;
+static void usage();
+static void validate_arguments(int argc, char* argv[], RunningOpt& run_options);
 
-  static void usage();
-  static void validate_arguments(int argc, char* argv[], RunningOpt& run_options);
 
 public:
   static void process_events();
+  static void start(Snake* snake, Level* level, RandomSPlayer* player);
   static void update();
   static void initialize(int argc, char* argv[]);
   static void move_snake();

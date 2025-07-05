@@ -32,3 +32,7 @@ TilePos Snake::get_next_location() {
 
   return next;
 }
+
+void Snake::bind_level(Level* level){
+  running_level = level;
+}

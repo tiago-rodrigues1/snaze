@@ -21,7 +21,7 @@ struct MoveDir {
 
 class Snake {
 private:
-Level running_level;
+Level* running_level;
 
 public:
 MoveDir actual_direction;
@@ -30,7 +30,7 @@ std::vector<TilePos> body;
   void step_foward();
   void step_backward();
   TilePos get_next_location();
-  void bind_level();
+  void bind_level(Level* level);
 
 };
 

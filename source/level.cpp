@@ -6,7 +6,6 @@
 
 #include <random>
 
-
 std::vector<Level> Level::level_parser(const std::string& path) {
   std::ifstream level_file{ path };
 
@@ -65,6 +64,8 @@ bool Level::in_board(const TilePos& loc) const {
   return loc.row >= 0 && loc.row < rows && loc.col >= 0 && loc.col < cols;
 }
 
+bool Level::is_snake(const TilePos& loc) const {return (get_content_at(loc) == 'V' || get_content_at(loc) == 'A');};
+
 bool Level::is_blocked(const TilePos& loc) const { return get_content_at(loc) == '.'; }
 
 bool Level::is_free(const TilePos& loc) const { return get_content_at(loc) == ' '; }
@@ -93,9 +94,8 @@ std::vector<TilePos> Level::get_empty_tiles() const {
   return empty_tiles;
 }
 
-void Level::set_content_at(const TilePos& loc, tile_type_e type){
-  switch (type)
-  {
+void Level::set_content_at(const TilePos& loc, tile_type_e type) {
+  switch (type) {
   case tile_type_e::EMPTY:
     board[loc.row][loc.col] = ' ';
     break;
@@ -105,13 +105,18 @@ void Level::set_content_at(const TilePos& loc, tile_type_e type){
   case tile_type_e::FOOD:
     board[loc.row][loc.col] = '*';
     break;
+  case tile_type_e::SNAKEHEAD:
+    board[loc.row][loc.col] = 'A';
+    break;
+  case tile_type_e::SNAKEBODY:
+    board[loc.row][loc.col] = 'V';
+    break;
   default:
     break;
   }
 }
 
-
-void Level::place_pellet(){
+void Level::place_pellet() {
   std::vector<TilePos> empty_tiles = get_empty_tiles();
 
   std::random_device rd;
@@ -121,11 +126,18 @@ void Level::place_pellet(){
 
   int random_tile_idx = range(gen);
 
-  pellet_loc = empty_tiles[random_tile_idx];  
+  pellet_loc = empty_tiles[random_tile_idx];
   set_content_at(empty_tiles[random_tile_idx], tile_type_e::FOOD);
 }
 
+void Level::remove_food() { set_content_at(pellet_loc, tile_type_e::EMPTY); }
 
-void Level::remove_food(){
-  set_content_at(pellet_loc, tile_type_e::EMPTY);
+void Level::remove_snake(const Snake& snake){
+  for(TilePos body_part : snake.body){
+    set_content_at(body_part, tile_type_e::EMPTY);
+  }
+}
+
+void Level::set_board(std::vector<std::string> m_board){
+  board = m_board;
 }

@@ -141,3 +141,24 @@ void SnazeSimulation::move_snake() {
     snake->step_foward();
   }
 }
+
+void SnazeSimulation::start(Snake* new_snake, Level* level, RandomSPlayer* new_player){
+  snake = new_snake;
+  running_level = level;
+  player = new_player;
+}
+
+
+void SnazeSimulation::process_events(){
+  switch (game_state)
+  {
+  case game_state_e::START:
+    break;
+  case game_state_e::RUN:
+    /* code */
+    break;
+  
+  default:
+    break;
+  }
+}

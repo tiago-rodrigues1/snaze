@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "common.hpp"
+#include "snake.hpp"
 
 enum tile_type_e : std::uint8_t {
   EMPTY = 0,
@@ -47,5 +48,7 @@ public:
   void place_pellet();
   std::vector<TilePos> get_empty_tiles() const;
   void set_content_at(const TilePos& loc,  tile_type_e type);
+  void remove_snake(const Snake& snake);
+  void set_board(std::vector<std::string> m_board);
 };
 #endif
