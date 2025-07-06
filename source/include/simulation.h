@@ -5,10 +5,10 @@
 #include <string>
 #include <vector>
 #include "snake.hpp"
+#include "player.hpp"
 
 enum game_state_e : std::uint8_t { START = 0, RUN, CRASH, LEVEL_UP, GAME_OVER };
 
-enum player_type_e : std::uint8_t { RANDOM = 0, BACKTRACKING, HUMAN };
 
 struct RunningOpt {
   std::vector<std::string> input_list;
@@ -20,16 +20,21 @@ struct RunningOpt {
 
 class SnazeSimulation {
 private:
-  static RunningOpt run_options;
-  static Snake snake;
+static RunningOpt run_options;
+static Snake* snake;
+static RandomSPlayer* player;
+static Level* running_level;
+static game_state_e game_state;
+static void usage();
+static void validate_arguments(int argc, char* argv[], RunningOpt& run_options);
 
-  static void usage();
-  static void validate_arguments(int argc, char* argv[], RunningOpt& run_options);
 
 public:
   static void process_events();
+  static void start(Snake* snake, Level* level, RandomSPlayer* player);
   static void update();
   static void initialize(int argc, char* argv[]);
+  static void move_snake();
 };
 
 #endif

@@ -6,26 +6,32 @@
 #include <vector>
 
 #include "common.hpp"
+#include "level.hpp"
 
 struct MoveDir {
   short dx;
   short dy;
   void turn_left();
   void turn_right();
+
+  bool operator==(const MoveDir& other) const {
+    return dx == other.dx && dy == other.dy;
+  }
 };
 
 class Snake {
 private:
-  std::vector<TilePos> body;
-  // SnakeLevel running_level
-  MoveDir actual_direction;
+Level* running_level;
 
 public:
+MoveDir actual_direction;
+std::vector<TilePos> body;
   unsigned short int lives;
   void step_foward();
   void step_backward();
   TilePos get_next_location();
-  void bind_level();
+  void bind_level(Level* level);
+
 };
 
 #endif

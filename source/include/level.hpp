@@ -7,6 +7,16 @@
 #include <vector>
 
 #include "common.hpp"
+#include "snake.hpp"
+
+enum tile_type_e : std::uint8_t {
+  EMPTY = 0,
+  WALL,
+  FOOD, 
+  SNAKEHEAD,
+  SNAKEBODY
+};
+
 
 class Level {
 private:
@@ -35,5 +45,13 @@ public:
   bool is_snake(const TilePos& loc) const;
   bool is_food(const TilePos& loc) const;
   void print();
+  TilePos get_snake_spawn_loc() const;
+  void remove_food();
+  TilePos get_food_loc() const;
+  void place_pellet();
+  std::vector<TilePos> get_empty_tiles() const;
+  void set_content_at(const TilePos& loc,  tile_type_e type);
+  void remove_snake(const Snake& snake);
+  void set_board(std::vector<std::string> m_board);
 };
 #endif

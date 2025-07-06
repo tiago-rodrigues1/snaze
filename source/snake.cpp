@@ -1,6 +1,6 @@
 #include "snake.hpp"
 
-void MoveDir::turn_left() {
+void MoveDir::turn_right() {
   // vira 90 graus com base na direção atual da cobra
   short new_dx = -dy;
   short new_dy = dx;
@@ -8,7 +8,7 @@ void MoveDir::turn_left() {
   dy = new_dy;
 }
 
-void MoveDir::turn_right() {
+void MoveDir::turn_left() {
   short new_dx = dy;
   short new_dy = -dx;
   dx = new_dx;
@@ -31,4 +31,8 @@ TilePos Snake::get_next_location() {
   next.row += actual_direction.dx;
 
   return next;
+}
+
+void Snake::bind_level(Level* level){
+  running_level = level;
 }
