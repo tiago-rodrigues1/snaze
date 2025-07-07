@@ -7,7 +7,8 @@
 #include <vector>
 
 #include "common.hpp"
-#include "snake.hpp"
+
+class Snake;
 
 enum tile_type_e : std::uint8_t {
   EMPTY = 0,
@@ -16,7 +17,6 @@ enum tile_type_e : std::uint8_t {
   SNAKEHEAD,
   SNAKEBODY
 };
-
 
 class Level {
 private:

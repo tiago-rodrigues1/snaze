@@ -1,11 +1,14 @@
-#include "simulation.h"
 #include <iostream>
 #include <stdexcept>
+
+#include "simulation.h"
 
 RunningOpt SnazeSimulation::run_options;
 Snake* SnazeSimulation::snake = nullptr;
 RandomSPlayer* SnazeSimulation::player = nullptr;
 Level* SnazeSimulation::running_level = nullptr;
+std::vector<Level> SnazeSimulation::levels;
+game_state_e SnazeSimulation::game_state = START;
 
 void SnazeSimulation::usage() {
 
@@ -100,8 +103,7 @@ void SnazeSimulation::validate_arguments(int argc, char* argv[], RunningOpt& run
       if (current_arg.substr(0, 2) == "--" || current_arg[0] == '-') {
         std::cout << "Warning: invalid option\n";
       } else {
-
-        // validação dos arquivos
+        levels = Level::level_parser(current_arg);
       }
     }
   }

@@ -1,4 +1,5 @@
 #include "snake.hpp"
+#include "level.hpp"
 
 void MoveDir::turn_right() {
   // vira 90 graus com base na direção atual da cobra

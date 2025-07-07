@@ -3,6 +3,7 @@
 #include <random>
 
 #include "level.hpp"
+#include "snake.hpp"
 #include "utils.hpp"
 
 Level::Level(std::vector<std::string> b, size_t r, size_t c) : board(b), rows(r), cols(c) {}
@@ -63,7 +64,7 @@ std::vector<Level> Level::level_parser(const std::string& path) {
       }
     } else {
       line = remove_invalid_chars(line);
-      board.push_back(line)
+      board.push_back(line);
     }
 
     if (board.size() == (size_t)rows) {
