@@ -133,32 +133,80 @@ void SnazeSimulation::move_snake() {
 
   if (test_dir(current_dir, next_move)) {
     snake->step_foward();
-  } else if (test_dir(current_dir, next_move, 1)){
+  } else if (test_dir(current_dir, next_move, 1)) {
     snake->actual_direction.turn_right();
     snake->step_foward();
-  } else if(test_dir(current_dir, next_move, 2)){
+  } else if (test_dir(current_dir, next_move, 2)) {
     snake->actual_direction.turn_left();
     snake->step_foward();
   }
 }
 
-void SnazeSimulation::start(Snake* new_snake, Level* level, RandomSPlayer* new_player){
+void SnazeSimulation::start(Snake* new_snake, Level* level, RandomSPlayer* new_player) {
   snake = new_snake;
   running_level = level;
   player = new_player;
 }
 
+void SnazeSimulation::process_events() {
+  switch (game_state) {
+  case game_state_e::GET_MAZ:
+    opening_message();
+    level_header();
 
-void SnazeSimulation::process_events(){
-  switch (game_state)
-  {
-  case game_state_e::START:
     break;
   case game_state_e::RUN:
     /* code */
     break;
-  
+
   default:
     break;
   }
 }
+
+void SnazeSimulation::update(){
+  switch (game_state) {
+  case game_state_e::GET_MAZ:
+    game_state = game_state_e::SHOW_MAZE;
+    break;
+  case game_state_e::SHOW_MAZE:
+    game_state = game_state_e::SOLVE_MAZE;
+    break;
+  case game_state_e::SOLVE_MAZE:
+    game_state = game_state_e::RUN;
+    break;
+  case game_state_e::CRASH:
+    game_state = game_state_e::SHOW_MAZE;
+    break;
+  default:
+    break;
+  }
+}
+
+void SnazeSimulation::opening_message() {
+  std::cout << " ---> Welcome to the classic Snake Game  <---\n"
+            << "      copyright DIMAp/UFRN 2017-2025\n"
+            << "------------------------------------------------------------\n"
+            << " Levels loaded:  " << run_options.input_list.size()
+            << " | Snake lives: " << run_options.lives << " | Apples to eat: " << run_options.food
+            << "\n"
+            << " Clear all levels to win the game. Good luck!!!\n"
+            << "------------------------------------------------------------\n"
+            << " >>> Press <ENTER> to start the game!\n\n";
+}
+
+void SnazeSimulation::print_lives() {
+  for (size_t i{ 0 }; i < snake->lives; ++i) {
+    std::cout << "♥";
+  }
+}
+
+void SnazeSimulation::level_header() {
+  std::cout << " Lives: ";
+  print_lives();
+  std::cout << "| Score: " << player->score << " | Food eaten: " << running_level->food_eaten
+            << " out of " << run_options.food << "\n";
+  std::cout << "------------------------------------------------------------\n";
+}
+
+void SnazeSimulation::

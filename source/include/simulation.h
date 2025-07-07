@@ -7,7 +7,7 @@
 #include "snake.hpp"
 #include "player.hpp"
 
-enum game_state_e : std::uint8_t { START = 0, RUN, CRASH, LEVEL_UP, GAME_OVER };
+enum game_state_e : std::uint8_t { GET_MAZE = 0, SHOW_MAZE, SOLVE_MAZE, RUN, CRASH, GAME_OVER };
 
 
 struct RunningOpt {
@@ -30,11 +30,15 @@ static void validate_arguments(int argc, char* argv[], RunningOpt& run_options);
 
 
 public:
+  static void print_lives();
+  static void level_header();
+  static void opening_message();
   static void process_events();
   static void start(Snake* snake, Level* level, RandomSPlayer* player);
   static void update();
   static void initialize(int argc, char* argv[]);
   static void move_snake();
+  static void print_level();
 };
 
 #endif

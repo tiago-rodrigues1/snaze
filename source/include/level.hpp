@@ -7,7 +7,8 @@
 #include <vector>
 
 #include "common.hpp"
-#include "snake.hpp"
+
+class Snake;
 
 enum tile_type_e : std::uint8_t {
   EMPTY = 0,
@@ -26,6 +27,7 @@ private:
   TilePos snake_spawn;
   TilePos pellet_loc;
 public:
+  int food_eaten;
   Level(std::vector<std::string> b, size_t r, size_t c);
 
   static std::vector<Level> level_parser(const std::string& path);

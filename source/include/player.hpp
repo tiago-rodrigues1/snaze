@@ -10,6 +10,7 @@ class SPlayer {
 public:
   SPlayer() = default;
   virtual ~SPlayer() = default;
+  int score;
   virtual MoveDir next_move() = 0;
   virtual player_type_e type() const = 0;
   virtual bool path_finder() { return false; };  //??
@@ -17,6 +18,7 @@ public:
 
 class RandomSPlayer : public SPlayer {
   public: 
+  int score;
   Level* running_level;
   Snake* snake;
   MoveDir next_move(std::vector<std::string>& board);
