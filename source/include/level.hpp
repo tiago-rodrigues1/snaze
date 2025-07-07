@@ -18,7 +18,6 @@ enum tile_type_e : std::uint8_t {
   SNAKEBODY
 };
 
-
 class Level {
 private:
   std::vector<std::string> board;

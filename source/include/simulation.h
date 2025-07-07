@@ -4,14 +4,13 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+
 #include "snake.hpp"
 #include "player.hpp"
 
 enum game_state_e : std::uint8_t { GET_MAZE = 0, SHOW_MAZE, SOLVE_MAZE, RUN, CRASH, GAME_OVER };
 
-
 struct RunningOpt {
-  std::vector<std::string> input_list;
   int fps{ 5 };
   int lives{ 5 };
   int food{ 10 };
@@ -20,6 +19,7 @@ struct RunningOpt {
 
 class SnazeSimulation {
 private:
+static std::vector<Level> levels;
 static RunningOpt run_options;
 static Snake* snake;
 static RandomSPlayer* player;

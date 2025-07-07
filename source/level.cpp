@@ -3,6 +3,7 @@
 #include <random>
 
 #include "level.hpp"
+#include "snake.hpp"
 #include "utils.hpp"
 #include "snake.hpp"
 
