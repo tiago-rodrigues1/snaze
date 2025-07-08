@@ -48,3 +48,5 @@ MoveDir RandomSPlayer::next_move(std::vector<std::string>& board) {
 }
 
 void RandomSPlayer::bind_snake(Snake* s) { snake = s; }
+
+void RandomSPlayer::bind_level(Level* l) {running_level = l;};

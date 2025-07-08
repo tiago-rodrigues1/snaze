@@ -27,6 +27,7 @@ private:
   TilePos pellet_loc;
 public:
   int food_eaten;
+  bool level_completed;
   Level(std::vector<std::string> b, size_t r, size_t c);
 
   static std::vector<Level> level_parser(const std::string& path);

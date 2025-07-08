@@ -6,9 +6,8 @@
 RunningOpt SnazeSimulation::run_options;
 Snake* SnazeSimulation::snake = nullptr;
 RandomSPlayer* SnazeSimulation::player = nullptr;
-Level* SnazeSimulation::running_level = nullptr;
 std::vector<Level> SnazeSimulation::levels;
-game_state_e SnazeSimulation::game_state = START;
+game_state_e SnazeSimulation::game_state = GET_MAZE;
 
 void SnazeSimulation::usage() {
 
@@ -129,7 +128,7 @@ bool test_dir(MoveDir current, MoveDir next, int dir = 0) {
 }
 
 void SnazeSimulation::move_snake() {
-  auto board = running_level->get_board();
+  auto board = levels[run_level_idx].get_board();
   MoveDir next_move = player->next_move(board);
   MoveDir current_dir = snake->actual_direction;
 
@@ -144,21 +143,54 @@ void SnazeSimulation::move_snake() {
   }
 }
 
-void SnazeSimulation::start(Snake* new_snake, Level* level, RandomSPlayer* new_player) {
-  snake = new_snake;
-  running_level = level;
-  player = new_player;
+void SnazeSimulation::start() {
+  snake = new Snake();
+  if (run_options.player_type == player_type_e::BACKTRACKING){
+    // backtracking snake
+  } else if (run_options.player_type == player_type_e::RANDOM){
+    player = new RandomSPlayer();
+  }
+  run_level_idx = 0;
+  snake->bind_level(&levels[run_level_idx]);
+  player->bind_snake(snake);
+  player->bind_level(&levels[run_level_idx]);
+  
+}
+
+void SnazeSimulation::pass_level(){
+  ++run_level_idx;
+  if(run_level_idx >= levels.size()){
+    game_state = game_state_e::GAME_OVER;
+    return;
+  }
+
+  snake->bind_level(&levels[run_level_idx]);
+  player->bind_snake(snake);
+  player->bind_level(&levels[run_level_idx]);
+}
+
+void SnazeSimulation::verify_lives(){
+  if(snake->lives == 0){
+    pass_level();
+    game_state = game_state_e::SHOW_MAZE;
+  }
 }
 
 void SnazeSimulation::process_events() {
   switch (game_state) {
-  case game_state_e::GET_MAZ:
+  case game_state_e::START_MAZE:
     opening_message();
+    start();
+    break;
+  case game_state_e::SHOW_MAZE:
     level_header();
-
+    print_level();
     break;
   case game_state_e::RUN:
-    /* code */
+    // move
+    break;
+  case game_state_e::CRASH:
+    verify_lives();
     break;
 
   default:
@@ -168,7 +200,7 @@ void SnazeSimulation::process_events() {
 
 void SnazeSimulation::update(){
   switch (game_state) {
-  case game_state_e::GET_MAZ:
+  case game_state_e::START_MAZE:
     game_state = game_state_e::SHOW_MAZE;
     break;
   case game_state_e::SHOW_MAZE:
@@ -189,7 +221,7 @@ void SnazeSimulation::opening_message() {
   std::cout << " ---> Welcome to the classic Snake Game  <---\n"
             << "      copyright DIMAp/UFRN 2017-2025\n"
             << "------------------------------------------------------------\n"
-            << " Levels loaded:  " << run_options.input_list.size()
+            << " Levels loaded:  " << levels.size()
             << " | Snake lives: " << run_options.lives << " | Apples to eat: " << run_options.food
             << "\n"
             << " Clear all levels to win the game. Good luck!!!\n"
@@ -206,9 +238,23 @@ void SnazeSimulation::print_lives() {
 void SnazeSimulation::level_header() {
   std::cout << " Lives: ";
   print_lives();
-  std::cout << "| Score: " << player->score << " | Food eaten: " << running_level->food_eaten
+  std::cout << "| Score: " << player->score << " | Food eaten: " << levels[run_level_idx].food_eaten
             << " out of " << run_options.food << "\n";
   std::cout << "------------------------------------------------------------\n";
 }
 
-void SnazeSimulation::
+void SnazeSimulation::print_level() {
+    for (const auto& row : levels[run_level_idx].get_board()) {
+        for (char c : row) {
+            switch (c) {
+                case '#': std::cout << "█"; break;      
+                case '*': std::cout << "🍎"; break;       
+                case 'V': std::cout << "●"; break;      
+                case 'A': std::cout << "☻"; break;
+                case '.': std::cout << "."; break;    
+                default:  std::cout << " "; break;        
+            }
+        }
+        std::cout << "\n";
+    }
+}

@@ -8,7 +8,7 @@
 #include "snake.hpp"
 #include "player.hpp"
 
-enum game_state_e : std::uint8_t { GET_MAZE = 0, SHOW_MAZE, SOLVE_MAZE, RUN, CRASH, GAME_OVER };
+enum game_state_e : std::uint8_t { GET_MAZE = 0, START_MAZE, SHOW_MAZE, SOLVE_MAZE, RUN, CRASH, GAME_OVER };
 
 struct RunningOpt {
   int fps{ 5 };
@@ -20,25 +20,28 @@ struct RunningOpt {
 class SnazeSimulation {
 private:
 static std::vector<Level> levels;
+static int run_level_idx;
 static RunningOpt run_options;
 static Snake* snake;
 static RandomSPlayer* player;
-static Level* running_level;
 static game_state_e game_state;
 static void usage();
 static void validate_arguments(int argc, char* argv[], RunningOpt& run_options);
+static void print_level();
+static void pass_level();
+static void print_lives();
+static void level_header();
+static void opening_message();
+static void start();
+static void verify_lives();
 
 
 public:
-  static void print_lives();
-  static void level_header();
-  static void opening_message();
   static void process_events();
-  static void start(Snake* snake, Level* level, RandomSPlayer* player);
   static void update();
   static void initialize(int argc, char* argv[]);
   static void move_snake();
-  static void print_level();
+  static bool is_over();
 };
 
 #endif

@@ -98,11 +98,6 @@ bool Level::is_free(const TilePos& loc) const { return get_content_at(loc) == ' 
 
 bool Level::is_wall(const TilePos& loc) const { return get_content_at(loc) == '#'; }
 
-void Level::print() {
-  for (const std::string& line : board) {
-    std::cout << line << '\n';
-  }
-}
 
 bool Level::is_food(const TilePos& loc) const { return get_content_at(loc) == '*'; }
 

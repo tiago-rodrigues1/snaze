@@ -19,7 +19,7 @@ set( APP_NAME "snaze" )
 add_executable( ${APP_NAME}
   source/snake.cpp
   source/simulation.cpp
-  source/main.cpp
+  source/test.cpp
   source/level.cpp
   source/utils.cpp
   source/player.cpp
