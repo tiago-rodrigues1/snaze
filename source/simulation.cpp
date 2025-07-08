@@ -173,6 +173,8 @@ void SnazeSimulation::verify_lives(){
   if(snake->lives == 0){
     pass_level();
     game_state = game_state_e::SHOW_MAZE;
+  } else{
+    snake->lives--;
   }
 }
 
@@ -191,8 +193,8 @@ void SnazeSimulation::process_events() {
     break;
   case game_state_e::CRASH:
     verify_lives();
+    // terminar
     break;
-
   default:
     break;
   }
