@@ -1,6 +1,8 @@
 #include "snake.hpp"
 #include "level.hpp"
 
+Snake::Snake(size_t lives) : m_lives(lives) {}
+
 void MoveDir::turn_right() {
   // vira 90 graus com base na direção atual da cobra
   short new_dx = -dy;

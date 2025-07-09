@@ -6,6 +6,7 @@
 #include "snake.hpp"
 #include "utils.hpp"
 #include "snake.hpp"
+#include "mapping.hpp"
 
 Level::Level(std::vector<std::string> b, size_t r, size_t c) : board(b), rows(r), cols(c) {}
 
@@ -37,6 +38,11 @@ void get_dimensions(const std::string& line, int& rows, int& cols) {
 std::vector<Level> Level::level_parser(const std::string& path) {
   std::vector<Level> levels;
   std::ifstream level_file{ path };
+
+  if (path.empty()) {
+    std::cerr << ">>> File input missing\n";
+    exit(EXIT_FAILURE);
+  }
 
   if (!is_valid_file(path) or !level_file.is_open()) {
     std::cerr << ">>> Sorry, could not read " << path << '\n';
@@ -101,6 +107,29 @@ bool Level::is_wall(const TilePos& loc) const { return get_content_at(loc) == '#
 
 bool Level::is_food(const TilePos& loc) const { return get_content_at(loc) == '*'; }
 
+void Level::print(size_t lives, int score, int food_to_eat) {
+  std::cout << "Lives: ";
+  for (size_t i{ 0 }; i < lives; ++i) {
+    std::cout << "♥";
+  }
+
+  std::cout << "| Score: " << score << " | Food eaten: " << food_eaten
+            << " out of " << food_to_eat << "\n";
+
+  std::cout << std::string(60, '-') << "\n\n";
+
+  for (const auto& row : board) {
+    for (char c : row) {
+      tile_type_e tile_type{ char_2_tile[c] };
+      std::cout << tile_2_string[tile_type];
+    }
+
+    std::cout << "\n";
+  }
+
+  std::cout << '\n' << std::string(60, '-') << '\n';
+}
+
 TilePos Level::get_snake_spawn_loc() const { return snake_spawn; };
 
 TilePos Level::get_food_loc() const { return pellet_loc; };
@@ -122,25 +151,7 @@ std::vector<TilePos> Level::get_empty_tiles() const {
 }
 
 void Level::set_content_at(const TilePos& loc, tile_type_e type) {
-  switch (type) {
-  case tile_type_e::EMPTY:
-    board[loc.row][loc.col] = ' ';
-    break;
-  case tile_type_e::WALL:
-    board[loc.row][loc.col] = '#';
-    break;
-  case tile_type_e::FOOD:
-    board[loc.row][loc.col] = '*';
-    break;
-  case tile_type_e::SNAKEHEAD:
-    board[loc.row][loc.col] = 'A';
-    break;
-  case tile_type_e::SNAKEBODY:
-    board[loc.row][loc.col] = 'V';
-    break;
-  default:
-    break;
-  }
+  board[loc.row][loc.col] = tile_2_char[type];
 }
 
 void Level::place_pellet() {

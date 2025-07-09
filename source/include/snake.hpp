@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 #include "common.hpp"
@@ -21,17 +22,24 @@ struct MoveDir {
 
 class Snake {
 private:
-Level* running_level;
+  Level* running_level;
+  size_t m_lives;
 
+  
 public:
-MoveDir actual_direction;
-std::vector<TilePos> body;
-  unsigned short int lives;
+  Snake(size_t lives);
+  
+  static std::unique_ptr<Snake> create_snake(size_t lives) {
+    return std::make_unique<Snake>(lives);
+  }
+
+  MoveDir actual_direction;
+  std::vector<TilePos> body;
   void step_foward();
   void step_backward();
   TilePos get_next_location();
   void bind_level(Level* level);
-
+  size_t lives() { return m_lives; };
 };
 
 #endif
