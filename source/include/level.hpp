@@ -10,14 +10,6 @@
 
 class Snake;
 
-enum tile_type_e : std::uint8_t {
-  EMPTY = 0,
-  WALL,
-  FOOD, 
-  SNAKEHEAD,
-  SNAKEBODY
-};
-
 class Level {
 private:
   std::vector<std::string> board;
@@ -25,9 +17,9 @@ private:
   size_t cols;
   TilePos snake_spawn;
   TilePos pellet_loc;
-public:
   int food_eaten;
   bool level_completed;
+public:
   Level(std::vector<std::string> b, size_t r, size_t c);
 
   static std::vector<Level> level_parser(const std::string& path);
@@ -46,7 +38,7 @@ public:
   bool is_wall(const TilePos& loc) const;
   bool is_snake(const TilePos& loc) const;
   bool is_food(const TilePos& loc) const;
-  void print();
+  void print(size_t lives, int score, int food_to_eat);
   TilePos get_snake_spawn_loc() const;
   void remove_food();
   TilePos get_food_loc() const;

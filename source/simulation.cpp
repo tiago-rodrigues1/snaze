@@ -2,24 +2,14 @@
 #include <stdexcept>
 
 #include "simulation.h"
+#include "render.hpp"
 
 RunningOpt SnazeSimulation::run_options;
-Snake* SnazeSimulation::snake = nullptr;
-RandomSPlayer* SnazeSimulation::player = nullptr;
+std::unique_ptr<Snake> SnazeSimulation::snake = nullptr;
+std::unique_ptr<SPlayer> SnazeSimulation::player = nullptr;
 std::vector<Level> SnazeSimulation::levels;
-game_state_e SnazeSimulation::game_state = GET_MAZE;
-
-void SnazeSimulation::usage() {
-
-  std::cout << "Usage: snaze [<options>] <input_level_file>\n"
-            << "Game simulation options:\n"
-            << "--help/-h Print this help text.\n"
-            << "--fps/-f <num> Number of frames (board) presented per second.\n"
-            << "--lives/-l <num> Number of lives the snake shall have. Default = 5.\n"
-            << "--food/-d <num> Number of food pellets for the entire simulation. Default = 10.\n"
-            << "--playertype/-p <type> Type of snake intelligence: random, backtracking. Default = "
-               "backtracking\n";
-}
+game_state_e SnazeSimulation::game_state = NEUTRAL;
+size_t SnazeSimulation::current_level_idx = 0;
 
 bool has_next_argument(int i, int argc) {
   if (i + 1 >= argc) {
@@ -69,7 +59,7 @@ void SnazeSimulation::validate_arguments(int argc, char* argv[], RunningOpt& run
     std::string current_arg{ argv[i] };
 
     if (current_arg == "--help" || current_arg == "-h") {
-      usage();
+      SnazeRender::usage();
       exit(0);
     }
 
@@ -102,7 +92,7 @@ void SnazeSimulation::validate_arguments(int argc, char* argv[], RunningOpt& run
       if (current_arg.substr(0, 2) == "--" || current_arg[0] == '-') {
         std::cout << "Warning: invalid option\n";
       } else {
-        levels = Level::level_parser(current_arg);
+        run_options.file_input = current_arg;
       }
     }
   }
@@ -111,152 +101,101 @@ void SnazeSimulation::validate_arguments(int argc, char* argv[], RunningOpt& run
 void SnazeSimulation::initialize(int argc, char* argv[]) {
 
   if (argc == 1) {
-    usage();
+    SnazeRender::usage();
     std::exit(1);
   }
 
   validate_arguments(argc, argv, run_options);
+  levels = Level::level_parser(run_options.file_input);
 }
 
-bool test_dir(MoveDir current, MoveDir next, int dir = 0) {
-  if (dir == 1) {
-    current.turn_right();
-  } else if (dir == 2) {
-    current.turn_left();
-  }
-  return (current.dx == next.dx && current.dy == next.dy);
-}
+// bool test_dir(MoveDir current, MoveDir next, int dir = 0) {
+//   if (dir == 1) {
+//     current.turn_right();
+//   } else if (dir == 2) {
+//     current.turn_left();
+//   }
+//   return (current.dx == next.dx && current.dy == next.dy);
+// }
 
-void SnazeSimulation::move_snake() {
-  auto board = levels[run_level_idx].get_board();
-  MoveDir next_move = player->next_move(board);
-  MoveDir current_dir = snake->actual_direction;
+// void SnazeSimulation::move_snake() {
+//   auto board = levels[run_level_idx].get_board();
+//   MoveDir next_move = player->next_move(board);
+//   MoveDir current_dir = snake->actual_direction;
 
-  if (test_dir(current_dir, next_move)) {
-    snake->step_foward();
-  } else if (test_dir(current_dir, next_move, 1)) {
-    snake->actual_direction.turn_right();
-    snake->step_foward();
-  } else if (test_dir(current_dir, next_move, 2)) {
-    snake->actual_direction.turn_left();
-    snake->step_foward();
-  }
-}
+//   if (test_dir(current_dir, next_move)) {
+//     snake->step_foward();
+//   } else if (test_dir(current_dir, next_move, 1)) {
+//     snake->actual_direction.turn_right();
+//     snake->step_foward();
+//   } else if (test_dir(current_dir, next_move, 2)) {
+//     snake->actual_direction.turn_left();
+//     snake->step_foward();
+//   }
+// }
 
 void SnazeSimulation::start() {
-  snake = new Snake();
-  if (run_options.player_type == player_type_e::BACKTRACKING){
-    // backtracking snake
-  } else if (run_options.player_type == player_type_e::RANDOM){
-    player = new RandomSPlayer();
-  }
-  run_level_idx = 0;
-  snake->bind_level(&levels[run_level_idx]);
-  player->bind_snake(snake);
-  player->bind_level(&levels[run_level_idx]);
+  snake = Snake::create_snake(run_options.lives);
+  player = SPlayer::create_player(run_options.player_type);
   
+  current_level_idx = 0;
+  player->bind_snake(snake.get());
 }
 
-void SnazeSimulation::pass_level(){
-  ++run_level_idx;
-  if(run_level_idx >= levels.size()){
-    game_state = game_state_e::GAME_OVER;
-    return;
-  }
-
-  snake->bind_level(&levels[run_level_idx]);
-  player->bind_snake(snake);
-  player->bind_level(&levels[run_level_idx]);
+void SnazeSimulation::load_level() {
+  snake->bind_level(&levels[current_level_idx]);
+  player->bind_level(&levels[current_level_idx]);
 }
 
-void SnazeSimulation::verify_lives(){
-  if(snake->lives == 0){
-    pass_level();
-    game_state = game_state_e::SHOW_MAZE;
-  } else{
-    snake->lives--;
-  }
-}
+// void SnazeSimulation::pass_level(){
+//   ++run_level_idx;
+//   if(run_level_idx >= levels.size()){
+//     game_state = game_state_e::GAME_OVER;
+//     return;
+//   }
+
+//   snake->bind_level(&levels[run_level_idx]);
+//   player->bind_snake(snake);
+//   player->bind_level(&levels[run_level_idx]);
+// }
+
+// void SnazeSimulation::verify_lives(){
+//   if(snake->lives == 0){
+//     pass_level();
+//     game_state = game_state_e::SHOW_MAZE;
+//   } else{
+//     snake->lives--;
+//   }
+// }
 
 void SnazeSimulation::process_events() {
-  switch (game_state) {
-  case game_state_e::START_MAZE:
-    opening_message();
+  if (game_state == START) {
     start();
-    break;
-  case game_state_e::SHOW_MAZE:
-    level_header();
-    print_level();
-    break;
-  case game_state_e::RUN:
-    // move
-    break;
-  case game_state_e::CRASH:
-    verify_lives();
-    // terminar
-    break;
-  default:
-    break;
+  } else if (game_state == LOAD_LEVEL) {
+    load_level();
   }
 }
 
-void SnazeSimulation::update(){
-  switch (game_state) {
-  case game_state_e::START_MAZE:
-    game_state = game_state_e::SHOW_MAZE;
-    break;
-  case game_state_e::SHOW_MAZE:
-    game_state = game_state_e::SOLVE_MAZE;
-    break;
-  case game_state_e::SOLVE_MAZE:
-    game_state = game_state_e::RUN;
-    break;
-  case game_state_e::CRASH:
-    game_state = game_state_e::SHOW_MAZE;
-    break;
-  default:
-    break;
+void SnazeSimulation::update() {
+  if (game_state == NEUTRAL) {
+    game_state = START;
+  } else if (game_state == START) {
+    game_state = LOAD_LEVEL;
+  } else if (game_state == LOAD_LEVEL) {
+    game_state = SHOW_LEVEL;
+  } else if (game_state == SHOW_LEVEL) {
+
   }
 }
 
-void SnazeSimulation::opening_message() {
-  std::cout << " ---> Welcome to the classic Snake Game  <---\n"
-            << "      copyright DIMAp/UFRN 2017-2025\n"
-            << "------------------------------------------------------------\n"
-            << " Levels loaded:  " << levels.size()
-            << " | Snake lives: " << run_options.lives << " | Apples to eat: " << run_options.food
-            << "\n"
-            << " Clear all levels to win the game. Good luck!!!\n"
-            << "------------------------------------------------------------\n"
-            << " >>> Press <ENTER> to start the game!\n\n";
-}
-
-void SnazeSimulation::print_lives() {
-  for (size_t i{ 0 }; i < snake->lives; ++i) {
-    std::cout << "♥";
+void SnazeSimulation::render() {
+  if (game_state == START) {
+    SnazeRender::welcome(levels.size(), run_options.lives, run_options.food);
+  } else if (game_state == SHOW_LEVEL) {
+    levels[current_level_idx].print(snake->lives(), player->score(), run_options.food);
   }
 }
 
-void SnazeSimulation::level_header() {
-  std::cout << " Lives: ";
-  print_lives();
-  std::cout << "| Score: " << player->score << " | Food eaten: " << levels[run_level_idx].food_eaten
-            << " out of " << run_options.food << "\n";
-  std::cout << "------------------------------------------------------------\n";
-}
-
-void SnazeSimulation::print_level() {
-    for (const auto& row : levels[run_level_idx].get_board()) {
-        for (char c : row) {
-            switch (c) {
-                case '#': std::cout << "█"; break;      
-                case '*': std::cout << "🍎"; break;       
-                case 'V': std::cout << "●"; break;      
-                case 'A': std::cout << "☻"; break;
-                case '.': std::cout << "."; break;    
-                default:  std::cout << " "; break;        
-            }
-        }
-        std::cout << "\n";
-    }
+bool SnazeSimulation::is_over() {
+  return game_state == SHOW_LEVEL;
 }

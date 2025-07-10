@@ -1,6 +1,15 @@
 #include "player.hpp"
 #include <random>
 
+std::unique_ptr<SPlayer> SPlayer::create_player(player_type_e player_type) {
+  if (player_type == player_type_e::BACKTRACKING) {
+    return nullptr;
+  } else if (player_type == player_type_e::RANDOM) {
+    return std::make_unique<RandomSPlayer>();
+  } else {
+    return nullptr;
+  }
+}
 
 MoveDir RandomSPlayer::next_move(std::vector<std::string>& board) {
   MoveDir actual_dir = snake->actual_direction;
@@ -40,7 +49,7 @@ MoveDir RandomSPlayer::next_move(std::vector<std::string>& board) {
 
       next_move = possible_moves[random_tile_idx];
     }
-  } else{
+  } else {
     next_move = actual_dir;
   }
 
@@ -49,4 +58,6 @@ MoveDir RandomSPlayer::next_move(std::vector<std::string>& board) {
 
 void RandomSPlayer::bind_snake(Snake* s) { snake = s; }
 
-void RandomSPlayer::bind_level(Level* l) {running_level = l;};
+player_type_e RandomSPlayer::type() const { return player_type_e::RANDOM; }
+
+void RandomSPlayer::bind_level(Level* l) { current_level = l; };

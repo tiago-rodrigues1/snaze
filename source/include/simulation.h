@@ -2,43 +2,34 @@
 #define SNAZE_HPP
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "snake.hpp"
 #include "player.hpp"
 
-enum game_state_e : std::uint8_t { GET_MAZE = 0, START_MAZE, SHOW_MAZE, SOLVE_MAZE, RUN, CRASH, GAME_OVER };
-
-struct RunningOpt {
-  int fps{ 5 };
-  int lives{ 5 };
-  int food{ 10 };
-  player_type_e player_type{ player_type_e::BACKTRACKING };
-};
+enum game_state_e : std::uint8_t { NEUTRAL = 0, START, LOAD_LEVEL, SHOW_LEVEL, START_MAZE, SHOW_MAZE, SOLVE_MAZE, RUN, CRASH, GAME_OVER };
 
 class SnazeSimulation {
 private:
-static std::vector<Level> levels;
-static int run_level_idx;
-static RunningOpt run_options;
-static Snake* snake;
-static RandomSPlayer* player;
-static game_state_e game_state;
-static void usage();
-static void validate_arguments(int argc, char* argv[], RunningOpt& run_options);
-static void print_level();
-static void pass_level();
-static void print_lives();
-static void level_header();
-static void opening_message();
-static void start();
-static void verify_lives();
+  static RunningOpt run_options;
+  static std::vector<Level> levels;
+  static size_t current_level_idx;
+  static std::unique_ptr<Snake> snake;
+  static std::unique_ptr<SPlayer> player;
+  static game_state_e game_state;
 
+  static void validate_arguments(int argc, char* argv[], RunningOpt& run_options);
+  static void start();
+  static void load_level();
+
+  static void verify_lives();
 
 public:
   static void process_events();
   static void update();
+  static void render();
   static void initialize(int argc, char* argv[]);
   static void move_snake();
   static bool is_over();
