@@ -39,3 +39,7 @@ TilePos Snake::get_next_location() {
 void Snake::bind_level(Level* level){
   running_level = level;
 }
+
+void Snake::set_life(size_t new_life){
+  m_lives = new_life;
+}

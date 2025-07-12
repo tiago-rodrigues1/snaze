@@ -23,10 +23,11 @@ private:
   static void validate_arguments(int argc, char* argv[], RunningOpt& run_options);
   static void start();
   static void load_level();
-
+  static void pass_level();
   static void verify_lives();
-
-public:
+  
+  public:
+  static void fps();
   static void process_events();
   static void update();
   static void render();
