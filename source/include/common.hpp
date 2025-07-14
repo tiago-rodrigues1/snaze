@@ -28,5 +28,7 @@ struct RunningOpt {
   player_type_e player_type{ player_type_e::BACKTRACKING };
   std::string file_input;
 };
+enum Dir : std::uint8_t { N = 0, L, S, O };
+
 
 #endif

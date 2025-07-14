@@ -47,5 +47,6 @@ public:
   void set_content_at(const TilePos& loc,  tile_type_e type);
   void remove_snake(const Snake& snake);
   void set_board(std::vector<std::string> m_board);
+  void set_snake(Snake& snake);
 };
 #endif

@@ -40,6 +40,8 @@ public:
   TilePos get_next_location();
   void bind_level(Level* level);
   size_t lives() { return m_lives; };
+  void move_to(Dir direction);
+
 };
 
 #endif

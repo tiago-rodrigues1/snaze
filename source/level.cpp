@@ -179,3 +179,8 @@ void Level::remove_snake(const Snake& snake){
 void Level::set_board(std::vector<std::string> m_board){
   board = m_board;
 }
+
+void Level::set_snake(Snake& snake){
+  set_content_at(snake_spawn, tile_type_e::SNAKEHEAD);
+  snake.body.push_back(snake_spawn);
+}
