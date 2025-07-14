@@ -179,3 +179,4 @@ void Level::remove_snake(const Snake& snake){
 void Level::set_board(std::vector<std::string> m_board){
   board = m_board;
 }
+

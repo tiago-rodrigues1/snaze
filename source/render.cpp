@@ -24,4 +24,5 @@ void SnazeRender::welcome(int loaded_levels, int lives, int food) {
             << " Clear all levels to win the game. Good luck!!!\n"
             << "------------------------------------------------------------\n"
             << " >>> Press <ENTER> to start the game!\n\n";
+  std::cin.get();
 }

@@ -111,30 +111,30 @@ void SnazeSimulation::initialize(int argc, char* argv[]) {
   levels = Level::level_parser(run_options.file_input);
 }
 
-// bool test_dir(MoveDir current, MoveDir next, int dir = 0) {
-//   if (dir == 1) {
-//     current.turn_right();
-//   } else if (dir == 2) {
-//     current.turn_left();
-//   }
-//   return (current.dx == next.dx && current.dy == next.dy);
-// }
+bool test_dir(MoveDir current, MoveDir next, int dir = 0) {
+  if (dir == 1) {
+    current.turn_right();
+  } else if (dir == 2) {
+    current.turn_left();
+  }
+  return (current.dx == next.dx && current.dy == next.dy);
+}
 
-// void SnazeSimulation::move_snake() {
-//   auto board = levels[run_level_idx].get_board();
-//   MoveDir next_move = player->next_move(board);
-//   MoveDir current_dir = snake->actual_direction;
+void SnazeSimulation::move_snake() {
+  auto board = levels[current_level_idx].get_board();
+  MoveDir next_move = player->next_move(board);
+  MoveDir current_dir = snake->actual_direction;
 
-//   if (test_dir(current_dir, next_move)) {
-//     snake->step_foward();
-//   } else if (test_dir(current_dir, next_move, 1)) {
-//     snake->actual_direction.turn_right();
-//     snake->step_foward();
-//   } else if (test_dir(current_dir, next_move, 2)) {
-//     snake->actual_direction.turn_left();
-//     snake->step_foward();
-//   }
-// }
+  if (test_dir(current_dir, next_move)) {
+    snake->step_foward();
+  } else if (test_dir(current_dir, next_move, 1)) {
+    snake->actual_direction.turn_right();
+    snake->step_foward();
+  } else if (test_dir(current_dir, next_move, 2)) {
+    snake->actual_direction.turn_left();
+    snake->step_foward();
+  }
+}
 
 void SnazeSimulation::start() {
   snake = Snake::create_snake(run_options.lives);
@@ -164,7 +164,7 @@ void SnazeSimulation::verify_lives() {
     pass_level();
     game_state = game_state_e::SHOW_MAZE;
   } else {
-    snake->set_life(current_life--);
+    snake->set_life(--current_life);
   }
 }
 
@@ -172,7 +172,10 @@ void SnazeSimulation::process_events() {
   if (game_state == START) {
     start();
   } else if (game_state == LOAD_LEVEL) {
+    levels[current_level_idx].set_snake();
     load_level();
+  } else if (game_state == game_state_e::RUN) {
+    move_snake();
   }
 }
 
@@ -191,6 +194,8 @@ void SnazeSimulation::render() {
   if (game_state == START) {
     SnazeRender::welcome(levels.size(), run_options.lives, run_options.food);
   } else if (game_state == SHOW_LEVEL) {
+    levels[current_level_idx].print(snake->lives(), player->score(), run_options.food);
+  } else if (game_state == RUN) {
     levels[current_level_idx].print(snake->lives(), player->score(), run_options.food);
   }
 }
