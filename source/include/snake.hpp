@@ -42,6 +42,7 @@ public:
   size_t lives() { return m_lives; };
   void move_to(Dir direction);
 
+  void set_life(size_t new_life);
 };
 
 #endif

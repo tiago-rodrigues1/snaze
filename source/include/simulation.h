@@ -35,9 +35,11 @@ private:
   static void start();
   static void load_level();
   static Snake get_snake() { return *snake.get(); }
+  static void pass_level();
   static void verify_lives();
-
-public:
+  
+  public:
+  static void fps();
   static void process_events();
   static void update();
   static void render();

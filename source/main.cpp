@@ -14,6 +14,7 @@ int main(int argc, char* argv[]) {
     SnazeSimulation::process_events();
     SnazeSimulation::update();
     SnazeSimulation::render();
+    SnazeSimulation::fps();
   }
   return 0;
 }

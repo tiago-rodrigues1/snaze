@@ -66,3 +66,6 @@ void Snake::move_to(Dir direction){
 
   step_foward();
 }
+void Snake::set_life(size_t new_life){
+  m_lives = new_life;
+}
