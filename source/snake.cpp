@@ -53,10 +53,6 @@ bool Snake::move_to(direction_e dir) {
     m_body.pop_back();
   }
 
-  if (running_level->is_food(new_head_loc)) {
-    std::cout << "FOOD\n";
-  }
-
   return running_level->is_blocked(new_head_loc) or running_level->is_wall(new_head_loc)
          or running_level->is_snake(new_head_loc);
 }

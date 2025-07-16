@@ -172,21 +172,17 @@ void SnazeSimulation::execute_directions() {
 
     if (!mortal_move) {
       if (level->is_food(snake_ptr->head())) {
-        // level->place_snake(snake_ptr, dir);
         game_state = EAT_FOOD;
-        // process_events();
       }
-
-      level->place_snake(snake_ptr, dir);
     } else {
-      std::cout << "GOODBYE\n";
       game_state = CRASH;
-      level->place_snake(snake_ptr, dir);
+    }
+
+    level->place_snake(snake_ptr, dir);
+
+    // Render dead snake
+    if (game_state == CRASH) {
       render();
-      // process_events();
-      // level->place_snake(snake_ptr, dir, true);
-      // level->print(snake_ptr->lives(), player.get()->score(), run_options.food);
-      // process_events();
     }
   } else {
     std::cerr << "Player ou Snake inválidos!\n";
