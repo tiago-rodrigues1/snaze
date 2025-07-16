@@ -6,33 +6,11 @@
 
 #include "common.hpp"
 
-std::unordered_map<char, tile_type_e> char_2_tile {
-  {'#', WALL},
-  {' ', EMPTY},
-  {'V', SNAKEHEAD},
-  {'O', SNAKEBODY},
-  {'*', FOOD},
-  {'.', INVISIBLE_WALL},
-  {'&', SPAWN}
-};
-
-std::unordered_map<tile_type_e, char> tile_2_char {
-  {WALL, '#'},
-  {EMPTY, ' '},
-  {SNAKEHEAD, 'V'},
-  {SNAKEBODY, 'O'},
-  {FOOD, '*'},
-  {SPAWN, '&'}
-};
-
-std::unordered_map<tile_type_e, std::string> tile_2_string {
-  {WALL, "█"},
-  {FOOD, "🍎"},
-  {SNAKEBODY, "●"},
-  {SNAKEHEAD, "V"},
-  {INVISIBLE_WALL, "."},
-  {EMPTY, " "},
-  {SPAWN, "𖦹"}
-};
+extern std::unordered_map<char, tile_type_e> char_2_tile;
+extern std::unordered_map<tile_type_e, char> tile_2_char;
+extern std::unordered_map<tile_type_e, std::string> tile_2_string;
+extern std::unordered_map<direction_e, std::pair<int, int>> dir_map;
+extern std::unordered_map<direction_e, std::string> dir_labels;
+extern std::unordered_map<direction_e, tile_type_e> dir_snakehead;
 
 #endif

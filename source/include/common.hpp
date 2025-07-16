@@ -15,9 +15,22 @@ enum tile_type_e : std::uint8_t {
   WALL,
   FOOD, 
   SNAKEHEAD,
+  SNAKEHEAD_NORTH,
+  SNAKEHEAD_EAST,
+  SNAKEHEAD_WEST,
+  SNAKEHEAD_SOUTH,
+  SNAKEHEAD_DEAD,
   SNAKEBODY,
   INVISIBLE_WALL,
   SPAWN,
+};
+
+enum direction_e : std::uint8_t {
+  NORTH = 0,
+  EAST,
+  SOUTH,
+  WEST,
+  INVALID
 };
 
 enum player_type_e : std::uint8_t { RANDOM = 0, BACKTRACKING };
