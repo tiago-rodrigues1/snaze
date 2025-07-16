@@ -19,7 +19,8 @@ enum game_state_e : std::uint8_t {
   RUN,
   EAT_FOOD,
   CRASH,
-  GAME_OVER
+  GAME_OVER,
+  GAME_END
 };
 
 class SPlayer;

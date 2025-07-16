@@ -9,6 +9,8 @@ private:
 public:
   static void usage();
   static void welcome(int loaded_levels, int lives, int food);
+  static void game_over(int score);
+  static std::string get_input(std::string_view msg);
 
   static void pass_level();
 

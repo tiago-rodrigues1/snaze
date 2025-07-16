@@ -183,7 +183,6 @@ void Level::place_pellet() {
 }
 
 void Level::remove_food() { 
-  std::cout << "Removing food (" << pellet_loc.row << ", " << pellet_loc.col << ")\n";
   set_content_at(pellet_loc, tile_type_e::EMPTY);
 }
 
