@@ -4,6 +4,18 @@
 #include <random>
 #include <set>
 
+#include <iostream>
+#include "mapping.hpp"
+#include "player.hpp"
+#include "simulation.h"
+
+struct PathUnit {
+  Snake snake;
+  std::deque<direction_e> path;
+  direction_e last_dir;
+  std::string get_key();
+};
+
 std::unique_ptr<SPlayer> SPlayer::create_player(player_type_e player_type) {
   if (player_type == player_type_e::BACKTRACKING) {
     return std::make_unique<BFSPlayer>();
@@ -14,49 +26,57 @@ std::unique_ptr<SPlayer> SPlayer::create_player(player_type_e player_type) {
   }
 }
 
-MoveDir RandomSPlayer::next_move(std::vector<std::string>& board) {
-  MoveDir actual_dir = snake->actual_direction;
-  TilePos snake_head = snake->body.back();
-  std::vector<MoveDir> possible_moves;
-  MoveDir next_move;
+std::vector<direction_e> get_valid_directions(const Level* level, const TilePos& loc) {
+  std::vector<direction_e> result;
 
-  size_t x = snake_head.col;
-  size_t y = snake_head.row;
+  for (const direction_e& dir : { NORTH, EAST, SOUTH, WEST }) {
+    TilePos neighbor;
+    auto [dir_row, dir_col] = dir_map[dir];
 
-  if (x + 1 < board[0].size() && board[y][x + 1] != '#' && board[y][x + 1] != '.') {
-    possible_moves.push_back({ 1, 0 });
+    neighbor.row = loc.row + dir_row;
+    neighbor.col = loc.col + dir_col;
+
+    if (level->in_board(neighbor) && (level->is_free(neighbor) || level->is_food(neighbor))) {
+      result.emplace_back(dir);
+    }
   }
 
-  if (x > 0 && board[y][x - 1] != '#' && board[y][x - 1] != '.') {
-    possible_moves.push_back({ -1, 0 });
-  }
+  return result;
+}
 
-  if (y + 1 < board.size() && board[y + 1][x] != '#' && board[y + 1][x] != '.') {
-    possible_moves.push_back({ 0, -1 });
-  }
-
-  if (y > 0 && board[y - 1][x] != '#' && board[y - 1][x] != '.') {
-    possible_moves.push_back({ 0, 1 });
-  }
+direction_e RandomSPlayer::next_move() {
+  TilePos snake_head{ snake->head() };
+  auto possible_moves{ get_valid_directions(current_level, snake_head) };
 
   if (!possible_moves.empty()) {
     if (possible_moves.size() == 1) {
-      next_move = possible_moves[0];
-    } else {
-      std::random_device rd;
-      std::mt19937 gen(rd());
-
-      std::uniform_int_distribution<> range(0, possible_moves.size() - 1);
-
-      int random_tile_idx = range(gen);
-
-      next_move = possible_moves[random_tile_idx];
+      return possible_moves[0];
     }
-  } else {
-    next_move = actual_dir;
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> range(0, possible_moves.size() - 1);
+    int random_tile_idx = range(gen);
+
+    switch (possible_moves[random_tile_idx]) {
+    case NORTH:
+      std::cout << "> Moving to NORTH\n";
+      break;
+    case EAST:
+      std::cout << "> Moving to EAST\n";
+      break;
+    case WEST:
+      std::cout << "> Moving to WEST\n";
+      break;
+    case SOUTH:
+      std::cout << "> Moving to SOUTH\n";
+      break;
+    }
+
+    return possible_moves[random_tile_idx];
   }
 
-  return next_move;
+  return INVALID;
 }
 
 void RandomSPlayer::bind_snake(Snake* s) { snake = s; }
@@ -71,24 +91,24 @@ void BFSPlayer::bind_snake(Snake* s) { snake = s; };
 
 player_type_e BFSPlayer::type() const { return player_type_e::BACKTRACKING; };
 
-
-std::string move_dir_to_str(MoveDir move_dir) {
-  if (move_dir.dx == 1 && move_dir.dy == 0) {
-    return "L";
-  } else if (move_dir.dx == -1 && move_dir.dy == 0) {
-    return "O";
-  } else if (move_dir.dx == 0 && move_dir.dy == 1) {
+std::string dir_to_str(direction_e dir) {
+  if (dir == direction_e::EAST) {
+    return "E";
+  } else if (dir == direction_e::WEST) {
+    return "W";
+  } else if (dir == direction_e::NORTH) {
     return "N";
-  } else if (move_dir.dx == 0 && move_dir.dy == -1) {
+  } else if (dir == direction_e::SOUTH) {
     return "S";
-  }
-}
+  } else if (dir == direction_e::NONE) {
+    return "SP";
+}}
 
 std::string PathUnit::get_key() {
   std::string key;
-  key.append(move_dir_to_str(snake.actual_direction));
+  key.append(dir_to_str(snake.current_dir));
 
-  for (auto body_part : snake.body) {
+  for (auto body_part : snake.body()) {
     key.append(",(");
     key.append(std::to_string(body_part.row));
     key.append(",");
@@ -99,31 +119,29 @@ std::string PathUnit::get_key() {
   return key;
 }
 
-TilePos moveto(TilePos snake_head, Dir direction){
-  switch (direction)
-  {
-  case Dir::N:
-    return TilePos{snake_head.row - 1, snake_head.col};
-  break;
-  case Dir::S:
-    return TilePos{snake_head.row + 1, snake_head.col};
-  break;
-  case Dir::L:
-    return TilePos{snake_head.row, snake_head.col + 1};
-  break;
-  case Dir::O:
-    return TilePos{snake_head.row, snake_head.col - 1};
-  break;
+TilePos moveto(TilePos snake_head, direction_e direction) {
+  switch (direction) {
+  case direction_e::NORTH:
+    return TilePos{ snake_head.row - 1, snake_head.col };
+    break;
+  case direction_e::SOUTH:
+    return TilePos{ snake_head.row + 1, snake_head.col };
+    break;
+  case direction_e::EAST:
+    return TilePos{ snake_head.row, snake_head.col + 1 };
+    break;
+  case direction_e::WEST:
+    return TilePos{ snake_head.row, snake_head.col - 1 };
+    break;
   default:
     break;
   }
 }
 
-
-std::deque<Dir> BFSPlayer::path_finder() {
+std::deque<direction_e> BFSPlayer::path_finder() {
   std::queue<PathUnit> places_to_visit;
   std::set<std::string> inspected;
-  current_level->remove_snake(*snake);
+  current_level->remove_snake(snake);
   // 2-- Guarda a localização atual para visitar.
   PathUnit spawn_loc{ *snake, {} };
   places_to_visit.push(spawn_loc);
@@ -135,19 +153,22 @@ std::deque<Dir> BFSPlayer::path_finder() {
     places_to_visit.pop();
     Snake& csnake = current_loc.snake;  // Apenas um alias.
     // 3.2-- Posicione a snake no level, p/ identificar p/ onde ela poderia ir.
-    current_level->set_snake(csnake);
+    current_level->place_snake(&csnake);
     // 3.3-- Analise cada posição alcançável a partir da atual.
-    for (Dir dir : { N, S, L, O }) {
-      auto destination = moveto(csnake.body.back(), dir);  // Coord. a explorar.
-      if (current_level->is_food(destination)) {           // É comida?
-        current_loc.path.push_back(dir);                   // Adicionar direção à solução.
-        return current_loc.path;                            // Retornar a solução.
+    for (direction_e dir : { NORTH, EAST, SOUTH, WEST }) {
+      auto destination = moveto(csnake.head(), dir);  // Coord. a explorar.
+      if (current_level->is_food(destination)) {      // É comida?
+        current_loc.path.push_back(dir);              // Adicionar direção à solução.
+        return current_loc.path;                      // Retornar a solução.
       }
       // Se livre, precisamos guardar..
       if (current_level->is_free(destination)) {
-        PathUnit new_loc{ current_loc };      // Clone p/ simular movimento da cobra
-        new_loc.snake.move_to(dir);  // Mova a (cópia da) cobra.
-        new_loc.path.push_back(dir);              // Adicione a direção ao caminho.
+        PathUnit new_loc{ current_loc };  // Clone p/ simular movimento da cobra
+        if (new_loc.snake.move_to(dir)) {
+          // MOVIMENTO INVÁLIDO → ignora esse caminho
+          continue;
+        }  // Mova a (cópia da) cobra.
+        new_loc.path.push_back(dir);  // Adicione a direção ao caminho.
         // Este local já foi registrado antes?
         if (inspected.count(new_loc.get_key()) == 0) {
           places_to_visit.push(new_loc);        // Visitar no futuro.
@@ -156,7 +177,22 @@ std::deque<Dir> BFSPlayer::path_finder() {
       }
     }
     // 3.4-- Remove snake temporária p/ próxima exploração.
-    current_level->remove_snake(csnake);
+    current_level->remove_snake(&csnake);
   }
   return {};  // Sem solução!!!
+}
+
+direction_e BFSPlayer::next_move() {
+
+  if (solution.empty()) {
+    solution = path_finder();
+  }
+
+  if (solution.empty()) {
+    return direction_e::INVALID;
+  } else {
+    direction_e next_dir = solution.front();
+    solution.pop_front();
+    return next_dir;
+  }
 }

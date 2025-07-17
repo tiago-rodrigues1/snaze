@@ -24,6 +24,7 @@ add_executable( ${APP_NAME}
   source/utils.cpp
   source/player.cpp
   source/render.cpp
+  source/mapping.cpp
 )
 target_include_directories( ${APP_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lib )
 target_compile_features( ${APP_NAME}  PUBLIC cxx_std_17 )

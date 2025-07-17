@@ -3,46 +3,43 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <deque>
 #include <memory>
-#include <vector>
 
 #include "common.hpp"
 #include "level.hpp"
+#include "mapping.hpp"
+#include "simulation.h"
 
-struct MoveDir {
-  short dx;
-  short dy;
-  void turn_left();
-  void turn_right();
-
-  bool operator==(const MoveDir& other) const {
-    return dx == other.dx && dy == other.dy;
-  }
-};
 
 class Snake {
 private:
   Level* running_level;
-  size_t m_lives;
-
+  int m_lives;
+  TilePos m_head;
+  int m_growth_counter = 0;
+  std::deque<TilePos> m_body;
   
-public:
-  Snake(size_t lives);
+  public:
+  direction_e current_dir;
+  Snake(int lives);
   
-  static std::unique_ptr<Snake> create_snake(size_t lives) {
-    return std::make_unique<Snake>(lives);
-  }
+  static std::unique_ptr<Snake> create_snake(int lives) {return std::make_unique<Snake>(lives); }
 
-  MoveDir actual_direction;
-  std::vector<TilePos> body;
+  TilePos head() const { return m_head; };
+  std::deque<TilePos> body() const { return m_body; };
+  TilePos next_head_location(direction_e dir);
+  int lives() { return m_lives; };
+  void bind_level(Level* level);
+  void spawn();
+  void die() {
+    m_lives -= 1;
+  };
+  void grow(int amount = 1);
   void step_foward();
   void step_backward();
   TilePos get_next_location();
-  void bind_level(Level* level);
-  size_t lives() { return m_lives; };
-  void move_to(Dir direction);
-
-  void set_life(size_t new_life);
+  bool move_to(direction_e direction);
 };
 
 #endif

@@ -1,71 +1,55 @@
 #include "snake.hpp"
+#include <iostream>
 #include "level.hpp"
 #include "player.hpp"
 
-Snake::Snake(size_t lives) : m_lives(lives) {}
+Snake::Snake(int lives) : m_lives(lives) {}
 
-void MoveDir::turn_right() {
-  // vira 90 graus com base na direção atual da cobra
-  short new_dx = -dy;
-  short new_dy = dx;
-  dx = new_dx;
-  dy = new_dy;
+TilePos Snake::next_head_location(direction_e dir) {
+  auto [dir_row, dir_col] = dir_map.at(dir);
+  size_t new_row{ m_head.row + dir_row };
+  size_t new_col{ m_head.col + dir_col };
+
+  return { new_row, new_col };
 }
 
-void MoveDir::turn_left() {
-  short new_dx = dy;
-  short new_dy = -dx;
-  dx = new_dx;
-  dy = new_dy;
-}
+bool Snake::move_to(direction_e dir) {
+  if (dir == INVALID) {
+    return true;
+  }
+  
 
-void Snake::step_foward() {
-  TilePos next = get_next_location();
-  body.push_back(next);
-  body.erase(body.begin());
-}
+  TilePos new_head_loc{ next_head_location(dir) };
 
-void Snake::step_backward() {
-  // desfazer o movimento
-}
+  m_body.push_front(m_head);
+  m_head = new_head_loc;
 
-TilePos Snake::get_next_location() {
-  TilePos next = body.back();
-  next.col += actual_direction.dx;
-  next.row += actual_direction.dy;
-
-  return next;
-}
-
-void Snake::bind_level(Level* level){
-  running_level = level;
-}
-
-void Snake::move_to(Dir direction){
-  switch (direction)
-  {
-  case Dir::N:
-    actual_direction.dx = 0;
-    actual_direction.dy = -1;
-    break;
-  case Dir::L:
-    actual_direction.dx = 1;
-    actual_direction.dy = 0;
-    break;
-  case Dir::O:
-    actual_direction.dx = -1;
-    actual_direction.dy = 0;
-    break;
-  case Dir::S:
-    actual_direction.dx = 0;
-    actual_direction.dy = 1;
-    break;
-  default:
-    break;
+  if (m_growth_counter > 0) {
+    --m_growth_counter;
+  } else {
+    m_body.pop_back();
   }
 
-  step_foward();
+  return running_level->is_blocked(new_head_loc) or running_level->is_wall(new_head_loc)
+         or running_level->is_snake(new_head_loc);
 }
-void Snake::set_life(size_t new_life){
-  m_lives = new_life;
+
+void Snake::grow(int amount) {
+  m_growth_counter += amount;
 }
+
+void Snake::spawn() {
+  m_body.clear();
+
+  auto sp = running_level->get_snake_spawn_loc();
+
+  std::cout << "SPAWN ROW = " << sp.row << " SPWAN COL = " << sp.col << '\n';
+
+  m_head = sp;
+  running_level->set_content_at(m_head, SNAKEHEAD);
+  current_dir = NONE;
+  m_growth_counter = 2;
+}
+
+void Snake::bind_level(Level* level) { running_level = level; }
+

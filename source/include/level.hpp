@@ -20,7 +20,7 @@ private:
   int food_eaten;
   bool level_completed;
 public:
-  Level(std::vector<std::string> b, size_t r, size_t c);
+  Level(std::vector<std::string> b, size_t r, size_t c, TilePos s);
 
   static std::vector<Level> level_parser(const std::string& path);
 
@@ -29,24 +29,23 @@ public:
 
   std::vector<std::string> get_board() { return board; };
 
-  // TODO: use mapping
   char get_content_at(const TilePos& loc) const;
-
   bool in_board(const TilePos& loc) const;
   bool is_blocked(const TilePos& loc) const;
   bool is_free(const TilePos& loc) const;
   bool is_wall(const TilePos& loc) const;
   bool is_snake(const TilePos& loc) const;
   bool is_food(const TilePos& loc) const;
-  void print(size_t lives, int score, int food_to_eat);
+  void print(int lives, int score, int food_to_eat);
+  void update_food_eaten(int amount = 1) { food_eaten += amount; };
   TilePos get_snake_spawn_loc() const;
   void remove_food();
   TilePos get_food_loc() const;
   void place_pellet();
   std::vector<TilePos> get_empty_tiles() const;
   void set_content_at(const TilePos& loc,  tile_type_e type);
-  void remove_snake(const Snake& snake);
+  void remove_snake(const Snake* snake);
+  void place_snake( Snake* snake, const direction_e& head_dir = SOUTH, bool is_dead = false);
   void set_board(std::vector<std::string> m_board);
-  void set_snake(Snake& snake);
 };
 #endif
