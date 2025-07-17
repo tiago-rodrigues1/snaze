@@ -6,7 +6,7 @@
 
 std::unique_ptr<SPlayer> SPlayer::create_player(player_type_e player_type) {
   if (player_type == player_type_e::BACKTRACKING) {
-    return nullptr;
+    return std::make_unique<BFSPlayer>();
   } else if (player_type == player_type_e::RANDOM) {
     return std::make_unique<RandomSPlayer>();
   } else {

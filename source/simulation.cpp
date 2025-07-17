@@ -174,7 +174,10 @@ void SnazeSimulation::process_events() {
   } else if (game_state == LOAD_LEVEL) {
     levels[current_level_idx].set_snake(*snake);
     load_level();
-  } else if (game_state == game_state_e::RUN) {
+  } else if (game_state == game_state_e::SOLVE_MAZE){
+    
+  }
+  else if (game_state == game_state_e::RUN) {
     move_snake();
   }
 }
@@ -187,6 +190,9 @@ void SnazeSimulation::update() {
   } else if (game_state == LOAD_LEVEL) {
     game_state = SHOW_LEVEL;
   } else if (game_state == SHOW_LEVEL) {
+    game_state == SOLVE_MAZE;
+  } else if (game_state == SOLVE_MAZE) {
+    game_state == RUN;
   }
 }
 
