@@ -22,6 +22,39 @@ void SnazeRender::welcome(int loaded_levels, int lives, int food) {
             << " | Snake lives: " << lives << " | Apples to eat: " << food
             << "\n"
             << " Clear all levels to win the game. Good luck!!!\n"
-            << "------------------------------------------------------------\n"
-            << " >>> Press <ENTER> to start the game!\n\n";
+            << "------------------------------------------------------------\n";
+
+  get_input(" >>> Press <ENTER> to start the game!\n");
+}
+
+void SnazeRender::game_over(int score) {
+  std::cout << "\n";
+  std::cout << "       ✖✖✖   G A M E   O V E R   ✖✖✖\n";
+  std::cout << "\n";
+  std::cout << "          Your final score was:\n";
+  std::cout << "                " << score << "\n";
+  std::cout << "\n";
+  std::cout << "        Better luck next time!\n";
+  std::cout << "\n";
+}
+
+void SnazeRender::game_won(int score) {
+  std::cout << "\n";
+  std::cout << "       ✔✔✔   G A M E   W O N   ✔✔✔\n";
+  std::cout << "\n";
+  std::cout << "          Your final score was:\n";
+  std::cout << "                " << score << "\n";
+  std::cout << "\n";
+  std::cout << "                Good job!\n";
+  std::cout << "\n";
+}
+
+
+
+std::string SnazeRender::get_input(std::string_view msg) { 
+  std::cout << msg << '\n';
+  std::string input; 
+  std::getline(std::cin, input);
+
+  return input;
 }

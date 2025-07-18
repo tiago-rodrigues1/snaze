@@ -15,12 +15,27 @@ enum tile_type_e : std::uint8_t {
   WALL,
   FOOD, 
   SNAKEHEAD,
+  SNAKEHEAD_NORTH,
+  SNAKEHEAD_EAST,
+  SNAKEHEAD_WEST,
+  SNAKEHEAD_SOUTH,
+  SNAKEHEAD_DEAD,
   SNAKEBODY,
   INVISIBLE_WALL,
   SPAWN,
 };
 
+enum direction_e : std::uint8_t {
+  NORTH = 0,
+  EAST,
+  SOUTH,
+  WEST,
+  INVALID, 
+  NONE
+};
+
 enum player_type_e : std::uint8_t { RANDOM = 0, BACKTRACKING };
+
 struct RunningOpt {
   int fps{ 5 };
   int lives{ 5 };
@@ -28,5 +43,7 @@ struct RunningOpt {
   player_type_e player_type{ player_type_e::BACKTRACKING };
   std::string file_input;
 };
+
+
 
 #endif

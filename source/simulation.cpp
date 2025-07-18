@@ -1,8 +1,13 @@
+#include <chrono>
 #include <iostream>
 #include <stdexcept>
+#include <thread>
 
-#include "simulation.h"
+#include <chrono>
+#include <thread>
+#include "player.hpp"
 #include "render.hpp"
+#include "simulation.h"
 
 RunningOpt SnazeSimulation::run_options;
 std::unique_ptr<Snake> SnazeSimulation::snake = nullptr;
@@ -109,70 +114,125 @@ void SnazeSimulation::initialize(int argc, char* argv[]) {
   levels = Level::level_parser(run_options.file_input);
 }
 
-// bool test_dir(MoveDir current, MoveDir next, int dir = 0) {
-//   if (dir == 1) {
-//     current.turn_right();
-//   } else if (dir == 2) {
-//     current.turn_left();
-//   }
-//   return (current.dx == next.dx && current.dy == next.dy);
-// }
-
-// void SnazeSimulation::move_snake() {
-//   auto board = levels[run_level_idx].get_board();
-//   MoveDir next_move = player->next_move(board);
-//   MoveDir current_dir = snake->actual_direction;
-
-//   if (test_dir(current_dir, next_move)) {
-//     snake->step_foward();
-//   } else if (test_dir(current_dir, next_move, 1)) {
-//     snake->actual_direction.turn_right();
-//     snake->step_foward();
-//   } else if (test_dir(current_dir, next_move, 2)) {
-//     snake->actual_direction.turn_left();
-//     snake->step_foward();
-//   }
-// }
-
 void SnazeSimulation::start() {
   snake = Snake::create_snake(run_options.lives);
   player = SPlayer::create_player(run_options.player_type);
-  
+
   current_level_idx = 0;
   player->bind_snake(snake.get());
 }
 
 void SnazeSimulation::load_level() {
-  snake->bind_level(&levels[current_level_idx]);
-  player->bind_level(&levels[current_level_idx]);
+  Level* current_level = get_current_level();
+
+  snake->bind_level(current_level);
+  player->bind_level(current_level);
 }
 
-// void SnazeSimulation::pass_level(){
-//   ++run_level_idx;
-//   if(run_level_idx >= levels.size()){
-//     game_state = game_state_e::GAME_OVER;
-//     return;
-//   }
+void SnazeSimulation::solve_maze() {
+  auto snake_ptr = snake.get();
+  auto level = get_current_level();
 
-//   snake->bind_level(&levels[run_level_idx]);
-//   player->bind_snake(snake);
-//   player->bind_level(&levels[run_level_idx]);
-// }
+  level->place_pellet();
+  snake_ptr->spawn();
+}
 
-// void SnazeSimulation::verify_lives(){
-//   if(snake->lives == 0){
-//     pass_level();
-//     game_state = game_state_e::SHOW_MAZE;
-//   } else{
-//     snake->lives--;
-//   }
-// }
+void SnazeSimulation::pass_level() {
+  ++current_level_idx;
+  if (current_level_idx >= levels.size()) {
+    game_state = game_state_e::GAME_WON;
+  } else {
+    game_state = LOAD_LEVEL;
+    process_events();
+  }
+}
+
+
+void SnazeSimulation::execute_directions() {
+  auto level = get_current_level();
+  auto snake_ptr = snake.get();
+
+  if (player && snake_ptr) {
+    auto dir = player->next_move();
+    level->remove_snake(snake_ptr);
+
+    bool mortal_move{ snake_ptr->move_to(dir) };
+
+    if (!mortal_move) {
+      if (level->is_food(snake_ptr->head())) {
+        game_state = EAT_FOOD;
+      }
+    } else {
+      game_state = CRASH;
+    }
+
+    level->place_snake(snake_ptr, dir);
+
+    // Render dead snake
+    if (game_state == CRASH) {
+      render();
+    }
+
+    if (game_state == CRASH or game_state == EAT_FOOD) {
+      process_events();
+    }
+  } else {
+    std::cerr << "Player ou Snake inválidos!\n";
+  }
+}
+
+void SnazeSimulation::handle_eat() {
+  auto snake_ptr = snake.get();
+  auto player_ptr = player.get();
+  auto level = get_current_level();
+
+  snake_ptr->grow();
+  player_ptr->update_score();
+  level->update_food_eaten();
+
+  if (level->get_food_eaten() >= run_options.food) {
+    game_state = PASS_LEVEL;
+  } else {
+    level->place_pellet();
+    game_state = RUN;
+    process_events();
+  }
+}
+
+void SnazeSimulation::handle_crash() {
+  auto snake_ptr = snake.get();
+  auto level = get_current_level();
+
+  snake_ptr->die();
+  level->remove_snake(snake_ptr);
+  level->remove_food();
+
+  if (snake_ptr->lives() <= 0) {
+    game_state = GAME_OVER;
+  } else {
+    game_state = SOLVE_MAZE;
+  }
+
+  process_events();
+}
 
 void SnazeSimulation::process_events() {
   if (game_state == START) {
+    std::cout << "OIII";
     start();
   } else if (game_state == LOAD_LEVEL) {
+    std::cout << "OIII";
     load_level();
+  } else if (game_state == SOLVE_MAZE) {
+    solve_maze();
+  } else if (game_state == RUN) {
+    execute_directions();
+  } else if (game_state == EAT_FOOD) {
+    handle_eat();
+  } else if (game_state == CRASH) {
+    handle_crash();
+  } else if (game_state == PASS_LEVEL) {
+    pass_level();
   }
 }
 
@@ -184,18 +244,51 @@ void SnazeSimulation::update() {
   } else if (game_state == LOAD_LEVEL) {
     game_state = SHOW_LEVEL;
   } else if (game_state == SHOW_LEVEL) {
-
+    game_state = SOLVE_MAZE;
+  } else if (game_state == SOLVE_MAZE) {
+    game_state = RUN;
+  } else if (game_state == EAT_FOOD) {
+    game_state = RUN;
+  } else if (game_state == CRASH) {
+    game_state = SOLVE_MAZE;
   }
 }
 
 void SnazeSimulation::render() {
   if (game_state == START) {
     SnazeRender::welcome(levels.size(), run_options.lives, run_options.food);
-  } else if (game_state == SHOW_LEVEL) {
+  } else if (game_state == SHOW_LEVEL || game_state == RUN || game_state == PASS_LEVEL) {
     levels[current_level_idx].print(snake->lives(), player->score(), run_options.food);
+  } else if (game_state == RUN) {
+    levels[current_level_idx].print(snake->lives(), player->score(), run_options.food);
+  } else if (game_state == CRASH) {
+    levels[current_level_idx].print(snake->lives(), player->score(), run_options.food);
+
+    if (snake->lives() - 1 > 0) {
+      SnazeRender::get_input(">>> Press <ENTER> to try again.");
+    }
+  } else if (game_state == GAME_OVER) {
+    SnazeRender::game_over(player->score());
+  } else if (game_state == GAME_WON) {
+    SnazeRender::game_won(player->score());
   }
 }
 
-bool SnazeSimulation::is_over() {
-  return game_state == SHOW_LEVEL;
+void SnazeSimulation::fps() {
+  using clock = std::chrono::steady_clock;
+  const int fps = run_options.fps;
+
+  const std::chrono::milliseconds frame_duration(1000 / fps);
+
+  static auto frame_end = clock::now();
+
+  auto now = clock::now();
+  auto work_time = std::chrono::duration_cast<std::chrono::milliseconds>(now - frame_end);
+
+  if (work_time < frame_duration) {
+    std::this_thread::sleep_for(frame_duration - work_time);
+  }
+  frame_end = clock::now();
 }
+
+bool SnazeSimulation::is_over() { return game_state == GAME_OVER || game_state == GAME_WON; }
