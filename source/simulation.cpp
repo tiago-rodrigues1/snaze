@@ -165,6 +165,11 @@ void SnazeSimulation::solve_maze() {
 
   level->place_pellet();
   snake_ptr->spawn();
+
+  if (player->type() == BACKTRACKING) {
+    BFSPlayer& bfs_player = dynamic_cast<BFSPlayer&>(*(player.get()));
+    bfs_player.set_random_mode(false);
+  }
 }
 
 /**

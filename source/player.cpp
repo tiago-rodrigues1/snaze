@@ -72,7 +72,6 @@ std::vector<direction_e> get_valid_directions(const Level* level, const TilePos&
  */
 direction_e SPlayer::get_random_dir() {
   TilePos snake_head{ snake->head() };
-  std::cout << snake_head.row << " " << snake_head.col << '\n';
   auto possible_moves{ get_valid_directions(current_level, snake_head) };
 
   if (!possible_moves.empty()) {

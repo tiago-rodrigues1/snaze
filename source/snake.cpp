@@ -73,7 +73,7 @@ void Snake::spawn() {
   m_head = sp;
   running_level->set_content_at(m_head, SNAKEHEAD);
   current_dir = NONE;
-  m_growth_counter = 2;
+  m_growth_counter = 0;
 }
 /**
  * Binds the snake to the current level.

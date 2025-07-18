@@ -116,7 +116,6 @@ std::vector<Level> Level::level_parser(const std::string& path) {
     }
 
     if (board.size() == (size_t)rows) {
-      std::cout << "\n" << rows << "\n" << cols << '\n' << spawn_loc.row << '\n' << spawn_loc.col << '\n';
       Level level(board, rows, cols, spawn_loc);
       levels.push_back(level);
 
