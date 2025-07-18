@@ -24,6 +24,13 @@ bool has_next_argument(int i, int argc) {
   return true;
 }
 
+/**
+ * Converts string to int and assigns to the proper run option field.
+ * 
+ * @param str_value String containing the number.
+ * @param run_options Struct storing runtime options.
+ * @param run_options_num Index indicating which option to set (0=fps,1=lives,2=food).
+ */
 void assign_if_valid_number(const std::string& str_value,
                             RunningOpt& run_options,
                             int run_options_num) {
@@ -52,6 +59,13 @@ void assign_if_valid_number(const std::string& str_value,
   }
 }
 
+/**
+ * Parses and validates command line arguments, updating run options.
+ * 
+ * @param argc Argument count.
+ * @param argv Argument vector.
+ * @param run_options Struct to hold runtime options.
+ */
 void SnazeSimulation::validate_arguments(int argc, char* argv[], RunningOpt& run_options) {
   bool skip_next{ false };
 
@@ -103,6 +117,12 @@ void SnazeSimulation::validate_arguments(int argc, char* argv[], RunningOpt& run
   }
 }
 
+/**
+ * Initializes the game simulation with given arguments.
+ * 
+ * @param argc Argument count.
+ * @param argv Argument vector.
+ */
 void SnazeSimulation::initialize(int argc, char* argv[]) {
 
   if (argc == 1) {
@@ -114,6 +134,9 @@ void SnazeSimulation::initialize(int argc, char* argv[]) {
   levels = Level::level_parser(run_options.file_input);
 }
 
+/**
+ * Creates snake and player instances and initializes starting state.
+ */
 void SnazeSimulation::start() {
   snake = Snake::create_snake(run_options.lives);
   player = SPlayer::create_player(run_options.player_type);
@@ -122,6 +145,10 @@ void SnazeSimulation::start() {
   player->bind_snake(snake.get());
 }
 
+/**
+ * Loads current level and binds it to snake and player.
+ */
+
 void SnazeSimulation::load_level() {
   Level* current_level = get_current_level();
 
@@ -129,6 +156,9 @@ void SnazeSimulation::load_level() {
   player->bind_level(current_level);
 }
 
+/**
+ * Prepares the current level for gameplay by placing food and spawning snake.
+ */
 void SnazeSimulation::solve_maze() {
   auto snake_ptr = snake.get();
   auto level = get_current_level();
@@ -137,6 +167,9 @@ void SnazeSimulation::solve_maze() {
   snake_ptr->spawn();
 }
 
+/**
+ * Advances to the next level or sets game as won if last level cleared.
+ */
 void SnazeSimulation::pass_level() {
   ++current_level_idx;
   if (current_level_idx >= levels.size()) {
@@ -147,7 +180,9 @@ void SnazeSimulation::pass_level() {
   }
 }
 
-
+/**
+ * Performs a game tick by executing player’s next move and updating game state.
+ */
 void SnazeSimulation::execute_directions() {
   auto level = get_current_level();
   auto snake_ptr = snake.get();
@@ -168,7 +203,6 @@ void SnazeSimulation::execute_directions() {
 
     level->place_snake(snake_ptr, dir);
 
-    // Render dead snake
     if (game_state == CRASH) {
       render();
     }
@@ -181,6 +215,9 @@ void SnazeSimulation::execute_directions() {
   }
 }
 
+/**
+ * Handles logic when snake eats food: growth, score update, and level progression.
+ */
 void SnazeSimulation::handle_eat() {
   auto snake_ptr = snake.get();
   auto player_ptr = player.get();
@@ -199,6 +236,9 @@ void SnazeSimulation::handle_eat() {
   }
 }
 
+/**
+ * Handles logic when snake crashes: lose life, remove snake/food, and check game over.
+ */
 void SnazeSimulation::handle_crash() {
   auto snake_ptr = snake.get();
   auto level = get_current_level();
@@ -216,12 +256,13 @@ void SnazeSimulation::handle_crash() {
   process_events();
 }
 
+/**
+ * Processes current game events based on the state machine.
+ */
 void SnazeSimulation::process_events() {
   if (game_state == START) {
-    std::cout << "OIII";
     start();
   } else if (game_state == LOAD_LEVEL) {
-    std::cout << "OIII";
     load_level();
   } else if (game_state == SOLVE_MAZE) {
     solve_maze();
@@ -236,6 +277,9 @@ void SnazeSimulation::process_events() {
   }
 }
 
+/**
+ * Advances the game state machine to the next appropriate state.
+ */
 void SnazeSimulation::update() {
   if (game_state == NEUTRAL) {
     game_state = START;
@@ -254,6 +298,9 @@ void SnazeSimulation::update() {
   }
 }
 
+/**
+ * Renders the game state to the console.
+ */
 void SnazeSimulation::render() {
   if (game_state == START) {
     SnazeRender::welcome(levels.size(), run_options.lives, run_options.food);
@@ -274,6 +321,9 @@ void SnazeSimulation::render() {
   }
 }
 
+/**
+ * Controls game loop timing to maintain configured FPS.
+ */
 void SnazeSimulation::fps() {
   using clock = std::chrono::steady_clock;
   const int fps = run_options.fps;
@@ -291,4 +341,9 @@ void SnazeSimulation::fps() {
   frame_end = clock::now();
 }
 
+/**
+ * Checks if the game is over (won or lost).
+ * 
+ * @return True if game ended, false otherwise.
+ */
 bool SnazeSimulation::is_over() { return game_state == GAME_OVER || game_state == GAME_WON; }
