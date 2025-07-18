@@ -24,7 +24,7 @@ private:
   direction_e current_dir;
   Snake(int lives);
   
-  static std::unique_ptr<Snake> create_snake(int lives) {return std::make_unique<Snake>(lives); }
+  static std::unique_ptr<Snake> create_snake(int lives) { return std::make_unique<Snake>(lives); }
 
   TilePos head() const { return m_head; };
   std::deque<TilePos> body() const { return m_body; };

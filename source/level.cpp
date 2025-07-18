@@ -71,6 +71,8 @@ std::vector<Level> Level::level_parser(const std::string& path) {
     if (rows == 0 and cols == 0) {
       get_dimensions(line, rows, cols);
 
+      spawn_loc = { 0, 0 };
+
       if (rows <= 0 or rows > MAX_GRID_SIZE or cols <= 0 or cols > MAX_GRID_SIZE) {
         std::cerr << ">>> " << path << " has invalid dimensions on level #" << (levels.size() + 1)
                   << ". Must be greater than 0 and less than " << MAX_GRID_SIZE << '\n';
@@ -86,6 +88,7 @@ std::vector<Level> Level::level_parser(const std::string& path) {
     }
 
     if (board.size() == (size_t)rows) {
+      std::cout << "\n" << rows << "\n" << cols << '\n' << spawn_loc.row << '\n' << spawn_loc.col << '\n';
       Level level(board, rows, cols, spawn_loc);
       levels.push_back(level);
 

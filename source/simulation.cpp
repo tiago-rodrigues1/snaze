@@ -129,15 +129,6 @@ void SnazeSimulation::load_level() {
   player->bind_level(current_level);
 }
 
-void SnazeSimulation::pass_level() {
-  ++current_level_idx;
-  if (current_level_idx >= levels.size()) {
-    game_state = game_state_e::GAME_WON;
-  } else {
-    game_state = LOAD_LEVEL;
-  }
-}
-
 void SnazeSimulation::solve_maze() {
   auto snake_ptr = snake.get();
   auto level = get_current_level();
@@ -145,6 +136,17 @@ void SnazeSimulation::solve_maze() {
   level->place_pellet();
   snake_ptr->spawn();
 }
+
+void SnazeSimulation::pass_level() {
+  ++current_level_idx;
+  if (current_level_idx >= levels.size()) {
+    game_state = game_state_e::GAME_WON;
+  } else {
+    game_state = LOAD_LEVEL;
+    process_events();
+  }
+}
+
 
 void SnazeSimulation::execute_directions() {
   auto level = get_current_level();
