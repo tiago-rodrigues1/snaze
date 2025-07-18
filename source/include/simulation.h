@@ -19,6 +19,7 @@ enum game_state_e : std::uint8_t {
   SOLVE_MAZE,
   RUN,
   EAT_FOOD,
+  PASS_LEVEL,
   CRASH,
   GAME_OVER,
   GAME_END,
@@ -38,7 +39,6 @@ private:
   static void validate_arguments(int argc, char* argv[], RunningOpt& run_options);
   static void start();
   static void load_level();
-  static Snake& get_snake() { return *snake.get(); }
   static void pass_level();
 
 public:
@@ -51,6 +51,7 @@ public:
 
   static void fps();
   static Level* get_current_level() { return &levels[current_level_idx]; }
+  static Snake& get_snake() { return *snake.get(); }
 
   static void process_events();
   static void update();

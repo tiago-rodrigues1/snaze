@@ -46,14 +46,17 @@ std::unordered_map<direction_e, std::pair<int, int>> dir_map = {
   {EAST, {0, 1}},
   {SOUTH, {1, 0}},
   {WEST, {0, -1}},
-  {INVALID, {0, 0}}
+  {INVALID, {0, 0}},
+  {NONE, {0, 0}}
 };
 
 std::unordered_map<direction_e, std::string> dir_labels = {
   {NORTH, "NORTH"},
   {EAST, "EAST"},
   {SOUTH, "SOUTH"},
-  {WEST, "WEST"}
+  {WEST, "WEST"},
+  {INVALID, "INVALID"},
+  {NONE, "NONE"}
 };
 
 std::unordered_map<direction_e, tile_type_e> dir_snakehead = {
@@ -61,5 +64,6 @@ std::unordered_map<direction_e, tile_type_e> dir_snakehead = {
   {EAST, SNAKEHEAD_EAST},
   {SOUTH, SNAKEHEAD},
   {WEST, SNAKEHEAD_WEST},
-  {INVALID, SNAKEHEAD_DEAD}
+  {INVALID, SNAKEHEAD_DEAD},
+  {NONE, SNAKEHEAD_DEAD}
 };

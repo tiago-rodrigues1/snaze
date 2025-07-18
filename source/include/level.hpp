@@ -47,5 +47,6 @@ public:
   void remove_snake(const Snake* snake);
   void place_snake( Snake* snake, const direction_e& head_dir = SOUTH, bool is_dead = false);
   void set_board(std::vector<std::string> m_board);
+  int get_food_eaten() { return food_eaten; };
 };
 #endif

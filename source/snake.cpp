@@ -43,8 +43,6 @@ void Snake::spawn() {
 
   auto sp = running_level->get_snake_spawn_loc();
 
-  std::cout << "SPAWN ROW = " << sp.row << " SPWAN COL = " << sp.col << '\n';
-
   m_head = sp;
   running_level->set_content_at(m_head, SNAKEHEAD);
   current_dir = NONE;

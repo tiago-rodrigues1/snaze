@@ -123,7 +123,6 @@ void SnazeSimulation::start() {
 }
 
 void SnazeSimulation::load_level() {
-
   Level* current_level = get_current_level();
 
   snake->bind_level(current_level);
@@ -134,10 +133,11 @@ void SnazeSimulation::pass_level() {
   ++current_level_idx;
   if (current_level_idx >= levels.size()) {
     game_state = game_state_e::GAME_WON;
-    return;
+  } else {
+    game_state = LOAD_LEVEL;
   }
-  load_level();
 }
+
 void SnazeSimulation::solve_maze() {
   auto snake_ptr = snake.get();
   auto level = get_current_level();
@@ -187,10 +187,14 @@ void SnazeSimulation::handle_eat() {
   snake_ptr->grow();
   player_ptr->update_score();
   level->update_food_eaten();
-  level->place_pellet();
 
-  game_state = RUN;
-  process_events();
+  if (level->get_food_eaten() >= run_options.food) {
+    game_state = PASS_LEVEL;
+  } else {
+    level->place_pellet();
+    game_state = RUN;
+    process_events();
+  }
 }
 
 void SnazeSimulation::handle_crash() {
@@ -210,16 +214,6 @@ void SnazeSimulation::handle_crash() {
   process_events();
 }
 
-void SnazeSimulation::verify_lives() {
-  size_t current_life = snake->lives();
-  if (current_life == 0) {
-    pass_level();
-    game_state = game_state_e::SHOW_MAZE;
-  } else {
-    snake->die();
-  }
-}
-
 void SnazeSimulation::process_events() {
   if (game_state == START) {
     std::cout << "OIII";
@@ -235,6 +229,8 @@ void SnazeSimulation::process_events() {
     handle_eat();
   } else if (game_state == CRASH) {
     handle_crash();
+  } else if (game_state == PASS_LEVEL) {
+    pass_level();
   }
 }
 
@@ -253,15 +249,13 @@ void SnazeSimulation::update() {
     game_state = RUN;
   } else if (game_state == CRASH) {
     game_state = SOLVE_MAZE;
-  } else if (game_state == GAME_WON) {
-    game_state = LOAD_LEVEL;
   }
 }
 
 void SnazeSimulation::render() {
   if (game_state == START) {
     SnazeRender::welcome(levels.size(), run_options.lives, run_options.food);
-  } else if (game_state == SHOW_LEVEL || game_state == RUN) {
+  } else if (game_state == SHOW_LEVEL || game_state == RUN || game_state == PASS_LEVEL) {
     levels[current_level_idx].print(snake->lives(), player->score(), run_options.food);
   } else if (game_state == RUN) {
     levels[current_level_idx].print(snake->lives(), player->score(), run_options.food);
@@ -295,4 +289,4 @@ void SnazeSimulation::fps() {
   frame_end = clock::now();
 }
 
-bool SnazeSimulation::is_over() { return game_state == GAME_OVER || game_state == GAME_END; }
+bool SnazeSimulation::is_over() { return game_state == GAME_OVER || game_state == GAME_WON; }

@@ -11,7 +11,11 @@
 
 class SPlayer {
 protected:
+  Level* current_level;
+  Snake* snake;
   int m_score{0};
+
+  direction_e get_random_dir();
 public:
   SPlayer() = default;
   virtual ~SPlayer() = default;
@@ -28,9 +32,6 @@ public:
 };
 
 class RandomSPlayer : public SPlayer {
-private:
-  Level* current_level;
-  Snake* snake;
 public: 
   direction_e next_move() override;
   virtual void bind_level(Level* l) override;
@@ -41,8 +42,8 @@ public:
 
 
 class BFSPlayer : public SPlayer {
-  Level* current_level;
-  Snake* snake;
+private:
+  bool random_mode{false};
 public: 
   std::deque<direction_e> solution;
   std::deque<direction_e>::iterator current_move;
