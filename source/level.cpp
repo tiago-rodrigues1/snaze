@@ -6,10 +6,25 @@
 #include "mapping.hpp"
 #include "snake.hpp"
 #include "utils.hpp"
-
+/**
+ * Constructs a Level object with the given board configuration.
+ * 
+ * @param b Board layout as a vector of strings.
+ * @param r Number of rows.
+ * @param c Number of columns.
+ * @param s Snake spawn position.
+ */
 Level::Level(std::vector<std::string> b, size_t r, size_t c, TilePos s)
     : board(b), rows(r), cols(c), snake_spawn(s) {}
 
+/**
+ * Removes invalid characters from a board line.
+ * 
+ * @param line A line of the board.
+ * @param spawn Reference to a TilePos where the spawn point will be updated.
+ * @param valids A string of valid characters allowed in the level.
+ * @return A sanitized version of the input line containing only valid characters.
+ */
 std::string remove_invalid_chars(const std::string& line,
                                  TilePos& spawn,
                                  const std::string& valids = " #. &") {
@@ -28,6 +43,13 @@ std::string remove_invalid_chars(const std::string& line,
   return clone;
 }
 
+/**
+ * Parses a line to extract the number of rows and columns.
+ * 
+ * @param line The line containing dimensions in the format "<int> <int>".
+ * @param rows Output parameter for number of rows.
+ * @param cols Output parameter for number of columns.
+ */
 void get_dimensions(const std::string& line, int& rows, int& cols) {
   auto dimensions{ split(line, ' ') };
 
@@ -40,6 +62,12 @@ void get_dimensions(const std::string& line, int& rows, int& cols) {
   cols = std::stoi(dimensions[1]);
 }
 
+/**
+ * Parses a level file and loads all defined levels.
+ * 
+ * @param path Path to the level file.
+ * @return A vector of Level objects parsed from the file.
+ */
 std::vector<Level> Level::level_parser(const std::string& path) {
   std::vector<Level> levels;
   std::ifstream level_file{ path };
@@ -62,8 +90,6 @@ std::vector<Level> Level::level_parser(const std::string& path) {
   std::string line;
 
   while (std::getline(level_file, line)) {
-    line = trim(line);
-
     if (line.size() == 0) {
       continue;
     }
@@ -82,13 +108,12 @@ std::vector<Level> Level::level_parser(const std::string& path) {
       line = remove_invalid_chars(line, spawn_loc);
       board.push_back(line);
 
-      if (spawn_loc.col == 0) {
+      if (spawn_loc.col == 0 and board[0][0] != tile_2_char[SPAWN]) {
         spawn_loc.row += 1;
       }
     }
 
     if (board.size() == (size_t)rows) {
-      std::cout << "\n" << rows << "\n" << cols << '\n' << spawn_loc.row << '\n' << spawn_loc.col << '\n';
       Level level(board, rows, cols, spawn_loc);
       levels.push_back(level);
 
@@ -103,24 +128,73 @@ std::vector<Level> Level::level_parser(const std::string& path) {
   return levels;
 }
 
+/**
+ * Gets the character at a specific board position.
+ * 
+ * @param loc The position to access.
+ * @return The character representing the content at the given position.
+ */
 char Level::get_content_at(const TilePos& loc) const { return board[loc.row][loc.col]; }
 
+/**
+ * Checks if a given position is within the board boundaries.
+ * 
+ * @param loc Position to check.
+ * @return true if the position is valid, false otherwise.
+ */
 bool Level::in_board(const TilePos& loc) const {
   return loc.row >= 0 && loc.row < rows && loc.col >= 0 && loc.col < cols;
 }
 
+/**
+ * Checks if a given position contains part of the snake.
+ * 
+ * @param loc Position to check.
+ * @return true if it's the snake's head or body, false otherwise.
+ */
 bool Level::is_snake(const TilePos& loc) const {
   return (get_content_at(loc) == 'V' || get_content_at(loc) == 'A');
 };
 
+/**
+ * Checks if a position is marked as blocked.
+ * 
+ * @param loc Position to check.
+ * @return true if it's a blocked tile, false otherwise.
+ */
 bool Level::is_blocked(const TilePos& loc) const { return get_content_at(loc) == '.'; }
 
+/**
+ * Checks if a position is empty.
+ * 
+ * @param loc Position to check.
+ * @return true if the tile is empty, false otherwise.
+ */
 bool Level::is_free(const TilePos& loc) const { return get_content_at(loc) == ' '; }
 
+/**
+ * Checks if a position contains a wall.
+ * 
+ * @param loc Position to check.
+ * @return true if it's a wall tile, false otherwise.
+ */
 bool Level::is_wall(const TilePos& loc) const { return get_content_at(loc) == '#'; }
 
+/**
+ * Checks if a position contains food.
+ * 
+ * @param loc Position to check.
+ * @return true if the tile contains food, false otherwise.
+ */
 bool Level::is_food(const TilePos& loc) const { return get_content_at(loc) == '*'; }
 
+/**
+ * Displays the current game board and player stats to the terminal.
+ * 
+ * @param lives Number of lives remaining.
+ * @param score Current score.
+ * @param food_to_eat Total amount of food to be collected.
+ */
 void Level::print(int lives, int score, int food_to_eat) {
   std::cout << "Lives: ";
   for (size_t i{ 0 }; i < (size_t)lives; ++i) {
@@ -136,8 +210,7 @@ void Level::print(int lives, int score, int food_to_eat) {
     for (char c : row) {
       tile_type_e tile_type{ char_2_tile[c] };
       std::cout << tile_2_string[tile_type];
-
-      // std::cout << c;
+      
     }
 
     std::cout << "\n";
@@ -146,10 +219,25 @@ void Level::print(int lives, int score, int food_to_eat) {
   std::cout << '\n' << std::string(60, '-') << '\n';
 }
 
+/**
+ * Returns the snake's spawn location.
+ * 
+ * @return The TilePos where the snake spawns.
+ */
 TilePos Level::get_snake_spawn_loc() const { return snake_spawn; };
 
+/**
+ * Returns the current location of the food pellet.
+ * 
+ * @return The TilePos of the food pellet.
+ */
 TilePos Level::get_food_loc() const { return pellet_loc; };
 
+/**
+ * Retrieves all empty tile positions on the board.
+ * 
+ * @return A vector of TilePos representing free tiles.
+ */
 std::vector<TilePos> Level::get_empty_tiles() const {
   std::vector<TilePos> empty_tiles;
   for (size_t i{ 0 }; i < rows; ++i) {
@@ -166,11 +254,19 @@ std::vector<TilePos> Level::get_empty_tiles() const {
   return empty_tiles;
 }
 
+/**
+ * Sets a tile's content at a given position.
+ * 
+ * @param loc The board position to update.
+ * @param type The tile type to set (e.g., wall, food, snake body).
+ */
 void Level::set_content_at(const TilePos& loc, tile_type_e type) {
-  // std::cout << ">>> " << tile_2_char[type] << '\n';
   board[loc.row][loc.col] = tile_2_char[type];
 }
 
+/**
+ * Randomly places a food pellet on an empty tile.
+ */
 void Level::place_pellet() {
   std::vector<TilePos> empty_tiles = get_empty_tiles();
 
@@ -185,13 +281,22 @@ void Level::place_pellet() {
   set_content_at(pellet_loc, tile_type_e::FOOD);
 }
 
+/**
+ * Removes the food pellet from the board.
+ */
 void Level::remove_food() { 
   set_content_at(pellet_loc, tile_type_e::EMPTY);
 }
 
+/**
+ * Places the snake on the board.
+ * 
+ * @param snake Pointer to the Snake object.
+ * @param head_dir Initial direction of the snake's head.
+ * @param is_dead Flag for snake state (currently unused).
+ */
 void Level::place_snake( Snake* snake, const direction_e& head_dir, bool is_dead) {
   snake->current_dir = head_dir;
-  std::cout << ">>>" << dir_labels[head_dir] << '\n';
   set_content_at(snake->head(), dir_snakehead[head_dir]);
 
   if (!snake->body().empty()) {
@@ -201,6 +306,11 @@ void Level::place_snake( Snake* snake, const direction_e& head_dir, bool is_dead
   }
 }
 
+/**
+ * Removes the snake's head and body from the board.
+ * 
+ * @param snake Pointer to the Snake object.
+ */
 void Level::remove_snake(const Snake* snake) {
   set_content_at(snake->head(), tile_type_e::EMPTY);
 
@@ -210,5 +320,3 @@ void Level::remove_snake(const Snake* snake) {
     }
   }
 }
-
-void Level::set_board(std::vector<std::string> m_board) { board = m_board; }

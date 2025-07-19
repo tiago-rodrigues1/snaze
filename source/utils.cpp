@@ -44,6 +44,15 @@ std::string trim(const std::string& s, const char* t) {
   return clone;
 }
 
+/**
+ * Splits a string into tokens based on a delimiter character.
+ * 
+ * Removes leading whitespace before extracting each token.
+ * 
+ * @param str The input string to split.
+ * @param delimiter The character used to split the string.
+ * @return A vector containing all the tokens extracted from the input string.
+ */
 std::vector<std::string> split(const std::string& str, char delimiter) {
   std::vector<std::string> tokens;
 
@@ -59,6 +68,12 @@ std::vector<std::string> split(const std::string& str, char delimiter) {
   return tokens;
 }
 
+/**
+ * Checks if a given path corresponds to an existing regular file.
+ * 
+ * @param path The filesystem path to check.
+ * @return true if the path exists and is a regular file, false otherwise.
+ */
 bool is_valid_file(const std::string& path) {
   return std::filesystem::exists(path) and std::filesystem::is_regular_file(path);
 }
