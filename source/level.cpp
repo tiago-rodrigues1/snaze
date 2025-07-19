@@ -90,8 +90,6 @@ std::vector<Level> Level::level_parser(const std::string& path) {
   std::string line;
 
   while (std::getline(level_file, line)) {
-    line = trim(line);
-
     if (line.size() == 0) {
       continue;
     }
@@ -110,7 +108,7 @@ std::vector<Level> Level::level_parser(const std::string& path) {
       line = remove_invalid_chars(line, spawn_loc);
       board.push_back(line);
 
-      if (spawn_loc.col == 0) {
+      if (spawn_loc.col == 0 and board[0][0] != tile_2_char[SPAWN]) {
         spawn_loc.row += 1;
       }
     }

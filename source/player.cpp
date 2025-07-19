@@ -24,7 +24,7 @@ struct PathUnit {
 
 /**
  * Factory method to create a new player based on the type.
- * 
+ *
  * @param player_type The desired type of player.
  * @return A unique pointer to the created player instance.
  */
@@ -40,9 +40,9 @@ std::unique_ptr<SPlayer> SPlayer::create_player(player_type_e player_type) {
 
 /**
  * Returns a list of valid movement directions from a given tile.
- * 
+ *
  * A direction is valid if the target tile is within the board and either free or contains food.
- * 
+ *
  * @param level Pointer to the current level.
  * @param loc Current position to evaluate.
  * @return A vector of valid directions.
@@ -67,7 +67,7 @@ std::vector<direction_e> get_valid_directions(const Level* level, const TilePos&
 
 /**
  * Gets a valid random direction for the snake to move.
- * 
+ *
  * @return A valid direction or INVALID if none are possible.
  */
 direction_e SPlayer::get_random_dir() {
@@ -92,44 +92,42 @@ direction_e SPlayer::get_random_dir() {
 
 /**
  * Returns the next move for the random player.
- * 
+ *
  * @return A random valid direction.
  */
-direction_e RandomSPlayer::next_move() {
-  return get_random_dir();
-}
+direction_e RandomSPlayer::next_move() { return get_random_dir(); }
 
 /**
  * Binds the snake instance to the player.
- * 
+ *
  * @param s Pointer to the snake.
  */
 void SPlayer::bind_snake(Snake* s) { snake = s; }
 
 /**
  * Binds the level instance to the player.
- * 
+ *
  * @param l Pointer to the level.
  */
 void SPlayer::bind_level(Level* l) { current_level = l; };
 
 /**
  * Returns the type of the player.
- * 
+ *
  * @return player_type_e::RANDOM
  */
 player_type_e RandomSPlayer::type() const { return player_type_e::RANDOM; }
 
 /**
  * Returns the type of the player.
- * 
+ *
  * @return player_type_e::BACKTRACKING
  */
 player_type_e BFSPlayer::type() const { return player_type_e::BACKTRACKING; };
 
 /**
  * Converts a direction enum to a string label.
- * 
+ *
  * @param dir Direction to convert.
  * @return String representation of the direction.
  */
@@ -144,7 +142,8 @@ std::string dir_to_str(direction_e dir) {
     return "S";
   } else if (dir == direction_e::NONE) {
     return "SP";
-}}
+  }
+}
 
 /**
  * Returns a unique string representing the snake's current state.
@@ -158,10 +157,10 @@ std::string PathUnit::get_key() {
   key.append(dir_to_str(snake.current_dir));
 
   key.append(",(");
-    key.append(std::to_string(snake.head().row));
-    key.append(",");
-    key.append(std::to_string(snake.head().col));
-    key.append(")");
+  key.append(std::to_string(snake.head().row));
+  key.append(",");
+  key.append(std::to_string(snake.head().col));
+  key.append(")");
 
   for (auto body_part : snake.body()) {
     key.append(",(");
@@ -176,36 +175,44 @@ std::string PathUnit::get_key() {
 
 /**
  * Computes the position resulting from moving in a given direction.
- * 
+ *
  * @param snake_head Current position of the snake's head.
  * @param direction Direction to move.
  * @return New TilePos after applying the direction.
  */
-TilePos moveto(TilePos snake_head, direction_e direction) {
+TilePos moveto(TilePos snake_head, direction_e direction, size_t max_rows, size_t max_cols) {
+  TilePos new_pos = snake_head;
+
   switch (direction) {
   case direction_e::NORTH:
-    return TilePos{ snake_head.row - 1, snake_head.col };
+    if (snake_head.row > 0)
+      new_pos.row--;
     break;
   case direction_e::SOUTH:
-    return TilePos{ snake_head.row + 1, snake_head.col };
+    if (snake_head.row + 1 < max_rows)
+      new_pos.row++;
     break;
   case direction_e::EAST:
-    return TilePos{ snake_head.row, snake_head.col + 1 };
+    if (snake_head.col + 1 < max_cols)
+      new_pos.col++;
     break;
   case direction_e::WEST:
-    return TilePos{ snake_head.row, snake_head.col - 1 };
+    if (snake_head.col > 0)
+      new_pos.col--;
     break;
   default:
     break;
   }
+
+  return new_pos;
 }
 
 /**
  * Executes the BFS algorithm to find a path to the food.
- * 
+ *
  * The function simulates possible snake movements from the current state and
  * returns a path that leads to the food, if one exists.
- * 
+ *
  * @return A deque of directions that lead the snake to the food.
  */
 std::deque<direction_e> BFSPlayer::path_finder() {
@@ -215,41 +222,43 @@ std::deque<direction_e> BFSPlayer::path_finder() {
   current_level->remove_snake(&snakebfs);
   PathUnit spawn_loc{ snakebfs, {} };
   places_to_visit.push(spawn_loc);
-  inspected.insert(spawn_loc.get_key());  
+  inspected.insert(spawn_loc.get_key());
   while (not places_to_visit.empty()) {
     auto current_loc = places_to_visit.front();
     places_to_visit.pop();
-    Snake& csnake = current_loc.snake;  
+    Snake& csnake = current_loc.snake;
     current_level->place_snake(&csnake);
     for (direction_e dir : { NORTH, EAST, SOUTH, WEST }) {
-      auto destination = moveto(csnake.head(), dir);  
-      if (current_level->is_food(destination)) {     
-        current_loc.path.push_back(dir);              
+      std::cout << dir_labels[dir] << '\n';
+      auto destination = moveto(csnake.head(), dir, current_level->n_rows(), current_level->n_cols());
+      std::cout << destination.row << " " << destination.col << '\n';
+      if (current_level->is_food(destination)) {
+        current_loc.path.push_back(dir);
         current_level->remove_snake(&csnake);
-        return current_loc.path;                    
+        return current_loc.path;
       }
-     
+
       if (current_level->is_free(destination)) {
-        PathUnit new_loc{ current_loc };  
+        PathUnit new_loc{ current_loc };
         new_loc.snake.move_to(dir);
-        new_loc.path.push_back(dir);  
+        new_loc.path.push_back(dir);
         if (inspected.count(new_loc.get_key()) == 0) {
-          places_to_visit.push(new_loc);        
-          inspected.insert(new_loc.get_key());  
+          places_to_visit.push(new_loc);
+          inspected.insert(new_loc.get_key());
         }
       }
     }
     current_level->remove_snake(&csnake);
   }
-  return {};  
+  return {};
 }
 
 /**
  * Returns the next move for the BFS player.
- * 
+ *
  * If a valid path to food exists, follows it step-by-step.
  * Otherwise, falls back to random movement.
- * 
+ *
  * @return The next direction to move.
  */
 direction_e BFSPlayer::next_move() {

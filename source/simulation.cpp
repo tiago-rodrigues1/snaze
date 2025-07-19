@@ -194,6 +194,7 @@ void SnazeSimulation::execute_directions() {
 
   if (player && snake_ptr) {
     auto dir = player->next_move();
+    std::cout << "NEXT:\n" << dir_labels[dir] << '\n';
     level->remove_snake(snake_ptr);
 
     bool mortal_move{ snake_ptr->move_to(dir) };
